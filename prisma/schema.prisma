@@ -42,5 +42,19 @@ model Shop {
   created_at        DateTime    @default(now())
   updated_at        DateTime    @updatedAt
 
+  products          Product[]
+
   @@map("shops")
+}
+
+model Product {
+  id                Int         @id @default(autoincrement())
+
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+
+  shop_id           Int
+  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("products")
 }

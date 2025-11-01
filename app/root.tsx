@@ -1,10 +1,17 @@
+import type { LinksFunction } from "@remix-run/node";
+import styles from "./global.css?url";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+]
 
 export default function App() {
   return (
@@ -23,6 +30,25 @@ export default function App() {
       <body>
         <Outlet />
         <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <p>Error - {(error as Error)?.message || (error as { data: string })?.data}</p>
         <Scripts />
       </body>
     </html>
