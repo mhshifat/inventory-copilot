@@ -13,6 +13,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SyncLogStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum SyncLogType {
+  PRODUCTS_IMPORT
+}
+
 model Session {
   id                  String    @id
   shop                String
@@ -43,6 +54,8 @@ model Shop {
   updated_at        DateTime    @updatedAt
 
   products          Product[]
+  variants          Variant[]
+  sync_logs         SyncLog[]
 
   @@map("shops")
 }
@@ -50,11 +63,54 @@ model Shop {
 model Product {
   id                Int         @id @default(autoincrement())
 
+  shopify_id        BigInt      @unique
+  title             String?
+  handle            String?
+  vendor            String?
+  image             String?
+
   created_at        DateTime    @default(now())
   updated_at        DateTime    @updatedAt
 
   shop_id           Int
   shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
+  variants          Variant[]
+
   @@map("products")
+}
+
+model Variant {
+  id                Int         @id @default(autoincrement())
+
+  shopify_id        BigInt      @unique
+  title             String?
+  sku               String?
+
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+
+  product_id        Int
+  product           Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  shop_id           Int
+  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("variants")
+}
+
+model SyncLog {
+  id                Int         @id @default(autoincrement())
+
+  status            SyncLogStatus
+  type              SyncLogType
+  message           String?
+
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+
+  shop_id           Int
+  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("sync_logs")
 }

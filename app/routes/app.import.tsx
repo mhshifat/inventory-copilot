@@ -1,34 +1,33 @@
+import PreviewError from "@/components/shared/preview-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useNavigate } from "@remix-run/react";
+import useFetch from "@/hooks/use-fetch";
+import type { ApiResponse } from "@/lib/api-response";
 import { DownloadIcon, PackageIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ImportProducts() {
-    const navigate = useNavigate();
     const [isImporting, setIsImporting] = useState(false);
     const [progress, setProgress] = useState(0);
+    const { error, fetch: handleImports } = useFetch("/api/import-products");
 
     const handleImport = () => {
         setIsImporting(true);
         setProgress(0);
 
-        // Simulate import progress
-        const interval = setInterval(() => {
-            setProgress((prev) => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    // Navigate to dashboard after completion
-                    setTimeout(() => {
-                        navigate("/");
-                    }, 500);
-                    return 100;
-                }
-                return prev + 2;
+        handleImports()
+            .then((data: ApiResponse<null>) => {
+                console.log("Import successful:", data);
+                toast.success(data.message || "Products import initiated!");
+            })
+            .catch((error) => {
+                console.error("Error during import:", error);
+                toast.error(error?.message || "An error occurred during import.");
             });
-        }, 50);
     };
+    if (error) return <PreviewError error={error} />;
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
             <Card className="w-full max-w-md shadow-lg">

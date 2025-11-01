@@ -1,0 +1,62 @@
+{"id":"gid:\/\/shopify\/Product\/10034584387867","title":"The Inventory Not Tracked Snowboard","handle":"the-inventory-not-tracked-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/snowboard_purple_hydrogen.png?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584387867"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269260059","title":"Default Title","sku":"sku-untracked-1","__parentId":"gid:\/\/shopify\/Product\/10034584387867"}
+{"id":"gid:\/\/shopify\/Product\/10034584420635","title":"Gift Card","handle":"gift-card","vendor":"Snowboard Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/gift_card.png?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584420635"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269325595","title":"$10","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584420635"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269358363","title":"$25","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584420635"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269391131","title":"$50","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584420635"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269423899","title":"$100","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584420635"}
+{"id":"gid:\/\/shopify\/Product\/10034584453403","title":"The Draft Snowboard","handle":"the-draft-snowboard","vendor":"Snowboard Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_5127218a-8f6c-498f-b489-09242c0fab0a.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584453403"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269620507","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584453403"}
+{"id":"gid:\/\/shopify\/Product\/10034584486171","title":"The Videographer Snowboard","handle":"the-videographer-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584486171"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/preview_images\/hqdefault.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584486171"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269489435","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584486171"}
+{"id":"gid:\/\/shopify\/Product\/10034584518939","title":"The Minimal Snowboard","handle":"the-minimal-snowboard","vendor":"Inventory Copilot Test Store"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269653275","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584518939"}
+{"id":"gid:\/\/shopify\/Product\/10034584551707","title":"The Collection Snowboard: Hydrogen","handle":"the-collection-snowboard-hydrogen","vendor":"Hydrogen Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_0a40b01b-5021-48c1-80d1-aa8ab4876d3d.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584551707"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269292827","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584551707"}
+{"id":"gid:\/\/shopify\/Product\/10034584584475","title":"The Hidden Snowboard","handle":"the-hidden-snowboard","vendor":"Snowboard Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_c8ff0b5d-c712-429a-be00-b29bd55cbc9d.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584584475"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269554971","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584584475"}
+{"id":"gid:\/\/shopify\/Product\/10034584617243","title":"The Compare at Price Snowboard","handle":"the-compare-at-price-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/snowboard_sky.png?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584617243"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269456667","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584617243"}
+{"id":"gid:\/\/shopify\/Product\/10034584650011","title":"The Out of Stock Snowboard","handle":"the-out-of-stock-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_f44a9605-cd62-464d-b095-d45cdaa0d0d7.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584650011"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269587739","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584650011"}
+{"id":"gid:\/\/shopify\/Product\/10034584682779","title":"The Complete Snowboard","handle":"the-complete-snowboard","vendor":"Snowboard Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_589fc064-24a2-4236-9eaf-13b2bd35d21d.jpg?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269784347","title":"Ice","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269817115","title":"Dawn","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269849883","title":"Powder","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269882651","title":"Electric","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269915419","title":"Sunset","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584682779"}
+{"id":"gid:\/\/shopify\/Product\/10034584715547","title":"Selling Plans Ski Wax","handle":"selling-plans-ski-wax","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/snowboard_wax.png?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/wax-special.png?v=1761990007"}},"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/sample-normal-wax.png?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269686043","title":"Selling Plans Ski Wax","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269718811","title":"Special Selling Plans Ski Wax","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269751579","title":"Sample Selling Plans Ski Wax","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584715547"}
+{"id":"gid:\/\/shopify\/Product\/10034584748315","title":"The Archived Snowboard","handle":"the-archived-snowboard","vendor":"Snowboard Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_52f8e304-92d9-4a36-82af-50df8fe31c69.jpg?v=1761990005"}},"__parentId":"gid:\/\/shopify\/Product\/10034584748315"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262269522203","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584748315"}
+{"id":"gid:\/\/shopify\/Product\/10034584781083","title":"The Multi-location Snowboard","handle":"the-multi-location-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_0a4e9096-021a-4c1e-8750-24b233166a12.jpg?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584781083"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262270079259","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584781083"}
+{"id":"gid:\/\/shopify\/Product\/10034584813851","title":"The Collection Snowboard: Oxygen","handle":"the-collection-snowboard-oxygen","vendor":"Hydrogen Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_d624f226-0a89-4fe1-b333-0d1548b43c06.jpg?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584813851"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262270112027","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584813851"}
+{"id":"gid:\/\/shopify\/Product\/10034584846619","title":"The 3p Fulfilled Snowboard","handle":"the-3p-fulfilled-snowboard","vendor":"Inventory Copilot Test Store"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_b9e0da7f-db89-4d41-83f0-7f417b02831d.jpg?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584846619"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262270177563","title":"Default Title","sku":"sku-hosted-1","__parentId":"gid:\/\/shopify\/Product\/10034584846619"}
+{"id":"gid:\/\/shopify\/Product\/10034584879387","title":"The Multi-managed Snowboard","handle":"the-multi-managed-snowboard","vendor":"Multi-managed Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_9129b69a-0c7b-4f66-b6cf-c4222f18028a.jpg?v=1761990006"}},"__parentId":"gid:\/\/shopify\/Product\/10034584879387"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262270144795","title":"Default Title","sku":"sku-managed-1","__parentId":"gid:\/\/shopify\/Product\/10034584879387"}
+{"id":"gid:\/\/shopify\/Product\/10034584912155","title":"The Collection Snowboard: Liquid","handle":"the-collection-snowboard-liquid","vendor":"Hydrogen Vendor"}
+{"preview":{"image":{"url":"https:\/\/cdn.shopify.com\/s\/files\/1\/0980\/6505\/6027\/files\/Main_b13ad453-477c-4ed1-9b43-81f3345adfd6.jpg?v=1761990007"}},"__parentId":"gid:\/\/shopify\/Product\/10034584912155"}
+{"id":"gid:\/\/shopify\/ProductVariant\/51262270275867","title":"Default Title","sku":null,"__parentId":"gid:\/\/shopify\/Product\/10034584912155"}
