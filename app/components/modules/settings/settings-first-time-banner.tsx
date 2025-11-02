@@ -10,7 +10,7 @@ export default function SettingsFirstTimeBanner() {
                         <SparklesIcon className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-foreground mb-2">
+                        <h2 className="text-2xl! font-bold! text-foreground mb-2">
                             Let's configure your forecasting preferences
                         </h2>
                         <p className="text-muted-foreground">

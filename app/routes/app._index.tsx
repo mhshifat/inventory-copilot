@@ -138,8 +138,8 @@ export default function Index() {
         <Card className="mb-8 animate-fade-in border-2">
           <CardContent className="pt-6">
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-foreground">Overall Progress</span>
+              <div className="flex justify-between items-center text-sm!">
+                <span className="font-medium! text-foreground">Overall Progress</span>
                 <span className="text-muted-foreground">
                   {completedSteps} of {steps.length} completed
                 </span>
@@ -170,10 +170,10 @@ export default function Index() {
                       )}
                     </div>
                     <div className="space-y-1 flex-1">
-                      <CardTitle className="text-xl">
+                      <CardTitle className="text-xl!">
                         Step {index + 1}: {step.title}
                       </CardTitle>
-                      <CardDescription className="text-base">
+                      <CardDescription className="text-base!">
                         {step.description}
                       </CardDescription>
                     </div>

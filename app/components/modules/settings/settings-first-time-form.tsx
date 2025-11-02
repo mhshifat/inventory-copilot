@@ -58,7 +58,7 @@ export default function SettingsFirstTimeForm() {
                         {/* Forecast Period */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="forecastPeriod" className="text-base font-medium">
+                                <Label htmlFor="forecastPeriod" className="text-base! font-medium!">
                                     Forecast Period <span className="text-destructive">*</span>
                                 </Label>
                                 <Tooltip>
@@ -94,7 +94,7 @@ export default function SettingsFirstTimeForm() {
                                     )
                                 }}
                             />
-                            <p className="text-sm text-muted-foreground flex items-start gap-2">
+                            <p className="text-sm! text-muted-foreground flex items-start gap-2">
                                 <span className="text-primary mt-0.5">💡</span>
                                 <span>
                                     We recommend 30 days for most businesses. This gives you enough time to order and receive inventory.
@@ -107,7 +107,7 @@ export default function SettingsFirstTimeForm() {
                         {/* Lead Time */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="defaultLeadTime" className="text-base font-medium">
+                                <Label htmlFor="defaultLeadTime" className="text-base! font-medium!">
                                     Lead Time (days) <span className="text-destructive">*</span>
                                 </Label>
                                 <Tooltip>
@@ -140,7 +140,7 @@ export default function SettingsFirstTimeForm() {
                                     </FormItem>
                                 )}
                             />
-                            <p className="text-sm text-muted-foreground flex items-start gap-2">
+                            <p className="text-sm! text-muted-foreground flex items-start gap-2">
                                 <span className="text-primary mt-0.5">💡</span>
                                 <span>
                                     Include shipping time + supplier processing time. For example, if your supplier takes 10 days to ship and 4 days for delivery, enter 14.
@@ -153,7 +153,7 @@ export default function SettingsFirstTimeForm() {
                         {/* Alert Threshold */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="lowStockThreshold" className="text-base font-medium">
+                                <Label htmlFor="lowStockThreshold" className="text-base! font-medium!">
                                     Alert Threshold (units) <span className="text-destructive">*</span>
                                 </Label>
                                 <Tooltip>
@@ -181,7 +181,7 @@ export default function SettingsFirstTimeForm() {
                                                     onChange={field.onChange}
                                                     className="flex-1"
                                                 />
-                                                <span className="text-sm text-muted-foreground whitespace-nowrap">units remaining</span>
+                                                <span className="text-sm! text-muted-foreground whitespace-nowrap">units remaining</span>
                                             </div>
                                         </FormControl>
                                         <FormMessage />
@@ -189,7 +189,7 @@ export default function SettingsFirstTimeForm() {
                                 )}
                             />
 
-                            <p className="text-sm text-muted-foreground flex items-start gap-2">
+                            <p className="text-sm! text-muted-foreground flex items-start gap-2">
                                 <span className="text-primary mt-0.5">💡</span>
                                 <span>
                                     We'll alert you when stock falls below this number. Set it high enough to reorder before you run out.

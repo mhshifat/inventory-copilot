@@ -212,7 +212,7 @@ export default function Settings() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <TrendingUpIcon className="h-5 w-5 text-primary" />
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <CardTitle>Forecast Settings</CardTitle>
                       <CardDescription>Configure default forecast and inventory parameters</CardDescription>
                     </div>
@@ -229,7 +229,7 @@ export default function Settings() {
                           <FormItem>
                             <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger id="forecastPeriod">
+                                <SelectTrigger id="forecastPeriod" className="min-w-[200px]">
                                   <SelectValue placeholder="Select forecast period" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -243,7 +243,7 @@ export default function Settings() {
                           </FormItem>
                         )}
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs! text-muted-foreground">
                         How far ahead to forecast sales and inventory needs
                       </p>
                     </div>
@@ -268,7 +268,7 @@ export default function Settings() {
                           </FormItem>
                         )}
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs! text-muted-foreground">
                         Expected time from order to delivery for suppliers
                       </p>
                     </div>
@@ -293,14 +293,14 @@ export default function Settings() {
                                 onChange={field.onChange}
                                 className="max-w-xs"
                               />
-                              <span className="text-sm text-muted-foreground">units remaining</span>
+                              <span className="text-sm! text-muted-foreground">units remaining</span>
                             </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs! text-muted-foreground">
                       Alert when inventory falls below this level
                     </p>
                   </div>
@@ -312,7 +312,7 @@ export default function Settings() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <BellIcon className="h-5 w-5 text-primary" />
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <CardTitle>Notifications</CardTitle>
                       <CardDescription>Manage how you receive inventory alerts</CardDescription>
                     </div>
@@ -321,8 +321,8 @@ export default function Settings() {
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="emailAlerts" className="text-base">Email Alerts</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label htmlFor="emailAlerts" className="text-base!">Email Alerts</Label>
+                      <p className="text-sm! text-muted-foreground">
                         Receive low stock and reorder alerts via email
                       </p>
                     </div>
@@ -366,7 +366,7 @@ export default function Settings() {
                           </FormItem>
                         )}
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs! text-muted-foreground">
                         All inventory notifications will be sent to this address
                       </p>
                     </div>
@@ -376,8 +376,8 @@ export default function Settings() {
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="inAppAlerts" className="text-base">In-App Alerts</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label htmlFor="inAppAlerts" className="text-base!">In-App Alerts</Label>
+                      <p className="text-sm! text-muted-foreground">
                         Show notifications within the application
                       </p>
                     </div>
@@ -439,7 +439,7 @@ export default function Settings() {
                         </FormItem>
                       )}
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs! text-muted-foreground">
                       How inventory quantities are displayed throughout the app
                     </p>
                   </div>

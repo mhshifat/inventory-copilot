@@ -22,7 +22,7 @@ export default function SettingsHeader() {
                         <SettingsIcon className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+                        <h1 className="text-3xl! font-bold! text-foreground">Settings</h1>
                         <p className="text-muted-foreground mt-1">Manage your inventory preferences and notifications</p>
                     </div>
                 </div>

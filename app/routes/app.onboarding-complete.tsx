@@ -60,7 +60,7 @@ export default function OnboardingComplete() {
                             <div className="relative">
                                 <div className="absolute inset-0 bg-success/20 rounded-full blur-xl animate-pulse" />
                                 <div className="relative bg-success/10 rounded-full p-6 animate-scale-in">
-                                    <CheckCircle2Icon className="h-20 w-20 text-success" strokeWidth={1.5} />
+                                    <CheckCircle2Icon className="h-20 w-20 text-su!ccess" strokeWidth={1.5} />
                                 </div>
                             </div>
                         </div>
@@ -81,24 +81,24 @@ export default function OnboardingComplete() {
                                 <div className="bg-primary/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto">
                                     <TrendingUpIcon className="h-5 w-5 text-primary" />
                                 </div>
-                                <h3 className="font-semibold text-sm">Smart Forecasting</h3>
-                                <p className="text-xs text-muted-foreground">AI-powered predictions</p>
+                                <h3 className="font-semibold text-sm!">Smart Forecasting</h3>
+                                <p className="text-xs! text-muted-foreground">AI-powered predictions</p>
                             </div>
 
                             <div className="bg-linear-to-br from-warning/10 to-warning/5 rounded-lg p-4 space-y-2 hover:scale-105 transition-transform">
                                 <div className="bg-warning/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto">
                                     <BellIcon className="h-5 w-5 text-warning" />
                                 </div>
-                                <h3 className="font-semibold text-sm">Real-time Alerts</h3>
-                                <p className="text-xs text-muted-foreground">Never miss a stockout</p>
+                                <h3 className="font-semibold text-sm!">Real-time Alerts</h3>
+                                <p className="text-xs! text-muted-foreground">Never miss a stockout</p>
                             </div>
 
                             <div className="bg-linear-to-br from-info/10 to-info/5 rounded-lg p-4 space-y-2 hover:scale-105 transition-transform">
                                 <div className="bg-info/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto">
                                     <BarChart3Icon className="h-5 w-5 text-info" />
                                 </div>
-                                <h3 className="font-semibold text-sm">Detailed Reports</h3>
-                                <p className="text-xs text-muted-foreground">Actionable insights</p>
+                                <h3 className="font-semibold text-sm!">Detailed Reports</h3>
+                                <p className="text-xs! text-muted-foreground">Actionable insights</p>
                             </div>
                         </div>
 
@@ -107,18 +107,18 @@ export default function OnboardingComplete() {
                             <Button
                                 size="lg"
                                 onClick={() => navigate("/app/dashboard")}
-                                className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                                className="text-lg! px-8 py-6 shadow-lg hover:shadow-xl transition-all hover:scale-105"
                             >
                                 Go to Dashboard
                             </Button>
                         </div>
 
                         {/* Helper Text */}
-                        <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0.6s" }}>
+                        <p className="text-sm! text-muted-foreground animate-fade-in" style={{ animationDelay: "0.6s" }}>
                             Need help getting started? Visit our{" "}
                             <button
                                 onClick={() => navigate("/app/help")}
-                                className="text-primary hover:underline font-medium"
+                                className="text-primary hover:underline font-medium!"
                             >
                                 Help Center
                             </button>
