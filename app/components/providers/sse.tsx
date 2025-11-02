@@ -7,8 +7,13 @@ interface SSEState {
 
 const SSEContext = createContext<SSEState | null>(null);
 
-export default function SSEProvider({ children }: { children: React.ReactNode }) {
-    const eventData = useEventSource('/api/sse');
+interface SSEProviderProps {
+    shop: string;
+    children: React.ReactNode;
+}
+
+export default function SSEProvider({ children, shop }: SSEProviderProps) {
+    const eventData = useEventSource('/api/sse?shop=' + encodeURIComponent(shop));
 
     return (
         <SSEContext.Provider value={{ eventData }}>
