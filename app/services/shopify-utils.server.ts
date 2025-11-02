@@ -157,8 +157,20 @@ export class ShopifyUtils {
                 }
             );
             options.log(`✅ Completed reading ${filePath}`);
+            await fs.promises.unlink(filePath);
+            options.log(`🗑️ Deleted temporary file ${filePath}`);
+
         } catch (err) {
             console.error(`❌ Failed reading file ${filePath}:`, err);
+
+            // Attempt safe cleanup (delete partial file if necessary)
+            try {
+                await fs.promises.unlink(filePath);
+                options.log(`🧹 File removed after failure: ${filePath}`);
+            } catch (cleanupErr) {
+                options.log(`⚠️ Failed to delete file after error: ${(cleanupErr as Error).message}`);
+            }
+
             throw err; // Re-throw for upstream handling if necessary
         }
     }

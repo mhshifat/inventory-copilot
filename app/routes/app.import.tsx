@@ -5,13 +5,17 @@ import { Progress } from "@/components/ui/progress";
 import useFetch from "@/hooks/use-fetch";
 import type { ApiResponse } from "@/lib/api-response";
 import { DownloadIcon, PackageIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useEventSource } from "remix-utils/sse/react";
+import { useNavigate } from "@remix-run/react";
 
 export default function ImportProducts() {
+    const navigate = useNavigate();
     const [isImporting, setIsImporting] = useState(false);
     const [progress, setProgress] = useState(0);
     const { error, fetch: handleImports } = useFetch("/api/import-products");
+    const eventData = useEventSource('/api/sse');
 
     const handleImport = () => {
         setIsImporting(true);
@@ -27,6 +31,23 @@ export default function ImportProducts() {
                 toast.error(error?.message || "An error occurred during import.");
             });
     };
+
+    useEffect(() => {
+        if (eventData) {
+            try {
+                const parsed = JSON.parse(eventData);
+                if (parsed.progress !== undefined && "type" in parsed && parsed.type === "PRODUCTS_IMPORT") {
+                    setProgress(parsed.progress);
+                    if (parsed.progress >= 100) {
+                        navigate('/app');
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to parse event data:", err);
+            }
+        }
+    }, [eventData]);
+
     if (error) return <PreviewError error={error} />;
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">

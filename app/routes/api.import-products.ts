@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/lib/api-response";
 import prisma from "@/lib/db.server";
-import { ProductsImportService } from "@/services/products-import.server";
+import { addProductsImportJob } from "@/services/workers/import-products-worker.server";
 import { authenticate, handleError } from "@/shopify.server";
 import { SyncLogStatus, SyncLogType } from "@prisma/client";
 import type { ActionFunctionArgs } from "@remix-run/node";
@@ -35,10 +35,12 @@ export const action = async (args: ActionFunctionArgs) => {
                 id: true
             }
         });
-        const productImportSrv = new ProductsImportService(
-            shop.id, syncLog.id, session.shop, session.accessToken
-        );
-        await productImportSrv.importProducts({});
+        await addProductsImportJob({
+            shopId: shop.id,
+            syncLogId: syncLog.id,
+            shop: session.shop,
+            accessToken: session.accessToken,
+        });
         
         return new ApiResponse({
             data: null,

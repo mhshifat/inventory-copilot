@@ -19,10 +19,11 @@ export class BaseService {
     async updateProgress(message: string, number: number) {
         this.log(message);
         this.log(`Progress: ${number}`);
-        await pubRedisConnection.publish(`shop:${this.shop}:sync_progress`, JSON.stringify({
+        const result = await pubRedisConnection.publish(`shop:${this.shop}:sync_progress`, JSON.stringify({
             type: this.type,
             message,
             progress: number
         }));
+        this.log(`Published progress update to ${result} subscribers.`);
     }
 }

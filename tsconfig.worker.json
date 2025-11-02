@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "noImplicitAny": true,
+    "moduleResolution": "bundler",
+    "sourceMap": false,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "checkJs": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@/*": ["./app/*"]
+    }
+  },
+  "ts-node": {
+    "experimentalSpecifierResolution": "node",
+    "experimentalResolver": true,
+    "transpileOnly": false,
+    "esm": true,
+    "logError": true,
+  },
+  "include": [
+    "./worker.ts",
+    "./app/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "./app/**/*.tsx",
+    "./app/components/**/*",
+    "./app/routes/**/*",
+    "./app/pages/**/*",
+    "./app/providers/**/*",
+    "./app/hooks/**/*",
+    "./app/entry.client.tsx",
+    "./app/entry.server.tsx",
+    "./app/root.tsx",
+    "./app/global.css",
+    "./app/globals.d.ts"
+  ]
+}

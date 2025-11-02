@@ -141,8 +141,7 @@ export class ProductsImportService extends BaseService {
                 throw new Error("No result URL found after bulk operation completion.");
             }
             await this.updateProgress("Step 2: Bulk operation completed, downloading data...", 40);
-
-            const downloadPath = path.resolve(__dirname, '../../public', `products-${this.shop}.jsonl`);
+            const downloadPath = path.resolve(__dirname, '../../downloads', `products-${this.shop}.jsonl`);
             await ShopifyUtils.downloadBulkOperationData(result, downloadPath, {}, {
                 log: (message: string) => this.log(message)
             });
@@ -211,6 +210,14 @@ export class ProductsImportService extends BaseService {
             products.clear();
             global.gc && global.gc();
             await this.updateProgress(`Step 4: Imported products into database for shop ID ${this.shopId}`, 100);
+            await prisma.syncLog.update({
+                where: { id: this.syncLogId },
+                data: {
+                    status: SyncLogStatus.COMPLETED,
+                    message: "Importing products completed successfully.",
+                    updated_at: new Date()
+                },
+            });
             this.log("=============== Finished Importing Products ===============");
         } catch (error) {
             const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
