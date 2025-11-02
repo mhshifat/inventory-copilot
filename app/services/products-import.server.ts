@@ -20,6 +20,7 @@ export interface ShopifyProduct {
     handle: string;
     image: string | null;
     vendor: string | null;
+    totalInventory: number | null;
     variants: ShopifyProductVariant[];
 }
 
@@ -82,6 +83,7 @@ export class ProductsImportService extends BaseService {
                                                 id
                                                 title
                                                 handle
+                                                totalInventory
                                                 media {
                                                     edges {
                                                         node {
@@ -196,7 +198,8 @@ export class ProductsImportService extends BaseService {
                             id: productId,
                             title: (chunk as unknown as { title: string }).title,
                             handle: (chunk as unknown as { handle: string }).handle,
-                            vendor: (chunk as { vendor?: string })?.vendor || null
+                            vendor: (chunk as { vendor?: string })?.vendor || null,
+                            totalInventory: (chunk as { totalInventory?: number })?.totalInventory || null,
                         });
                     }
                 }
@@ -253,6 +256,7 @@ export class ProductsImportService extends BaseService {
                 product.handle,
                 product.vendor,
                 product.image,
+                product.totalInventory,
                 shopId,
                 now,
                 now
@@ -260,8 +264,8 @@ export class ProductsImportService extends BaseService {
 
             const placeholders = batch
                 .map((_, i) => {
-                    const base = i * 8;
-                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+                    const base = i * 9;
+                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
                 })
                 .join(", ");
 
@@ -270,7 +274,7 @@ export class ProductsImportService extends BaseService {
                     await tx.$executeRawUnsafe(
                         `
                             INSERT INTO "products" (
-                                "shopify_id", title, handle, vendor, image, shop_id, created_at, updated_at
+                                "shopify_id", title, handle, vendor, image, total_inventory, shop_id, created_at, updated_at
                             ) 
                             VALUES ${placeholders}
                             ON CONFLICT (shopify_id)
@@ -280,7 +284,8 @@ export class ProductsImportService extends BaseService {
                                 image = EXCLUDED.image,
                                 shop_id = EXCLUDED.shop_id,
                                 created_at = EXCLUDED.created_at,
-                                updated_at = EXCLUDED.updated_at;
+                                updated_at = EXCLUDED.updated_at,
+                                total_inventory = EXCLUDED.total_inventory;
                         `,
                         ...values
                     );

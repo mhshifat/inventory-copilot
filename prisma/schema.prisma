@@ -68,6 +68,7 @@ model Product {
   handle            String?
   vendor            String?
   image             String?
+  total_inventory   Int?        @default(0)
 
   created_at        DateTime    @default(now())
   updated_at        DateTime    @updatedAt

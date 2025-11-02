@@ -43,6 +43,7 @@ CREATE TABLE "products" (
     "handle" TEXT,
     "vendor" TEXT,
     "image" TEXT,
+    "total_inventory" INTEGER DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "shop_id" INTEGER NOT NULL,
