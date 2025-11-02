@@ -66,11 +66,11 @@ export default function OnboardingComplete() {
                         </div>
 
                         {/* Headline */}
-                        <div className="space-y-3 animate-fade-in flex flex-col items-center gap-1">
-                            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                        <div className="space-y-3 animate-fade-in flex flex-col items-center gap-2">
+                            <h1 className="text-4xl! md:text-5xl! font-bold! text-foreground">
                                 You're all set up! 🚀
                             </h1>
-                            <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+                            <p className="text-lg! text-muted-foreground max-w-lg mx-auto">
                                 Your forecasts are now live. We'll keep monitoring your stock and send alerts when needed.
                             </p>
                         </div>

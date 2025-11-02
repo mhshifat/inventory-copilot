@@ -126,10 +126,10 @@ export default function Index() {
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-4xl! md:text-5xl! font-bold! text-foreground mb-4">
             👋 Welcome to Inventory Copilot!
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg! text-muted-foreground">
             Let's help you forecast inventory and prevent stockouts.
           </p>
         </div>
@@ -201,7 +201,7 @@ export default function Index() {
         {allCompleted && (
           <Card className="mt-8 border-success bg-success/5 animate-scale-in">
             <CardContent className="pt-6 text-center flex flex-col items-center gap-5">
-              <h3 className="text-2xl font-bold text-success mb-2">
+              <h3 className="text-2xl! font-bold! text-success mb-2">
                 🎉 Congratulations!
               </h3>
               <p className="text-muted-foreground mb-4 max-w-[50%] text-center ml-auto">

@@ -68,9 +68,9 @@ export default function ImportProducts() {
                     </div>
 
                     {/* Title and Description */}
-                    <div className="space-y-2">
-                        <h1 className="text-3xl font-bold text-foreground">Welcome to Inventory Overview</h1>
-                        <p className="text-muted-foreground">
+                    <div className="space-y-2 flex flex-col gap-2">
+                        <h1 className="text-3xl! font-bold! text-foreground">Welcome to Inventory Overview</h1>
+                        <p className="text-muted-foreground text-sm! font-normal!">
                             {isImporting
                                 ? "Importing your products from Shopify..."
                                 : "Let's get started by importing your products"}
@@ -91,13 +91,13 @@ export default function ImportProducts() {
                     ) : (
                         <div className="space-y-3 max-w-xs mx-auto">
                             <Progress value={progress} className="h-3" />
-                            <p className="text-sm font-medium text-foreground">{progress}% Complete</p>
+                            <p className="text-sm! font-medium! text-foreground">{progress}% Complete</p>
                         </div>
                     )}
 
                     {/* Info text */}
                     {!isImporting && (
-                        <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                        <p className="text-xs! text-muted-foreground max-w-sm mx-auto">
                             This will sync your product inventory, stock levels, and sales data from your Shopify
                             store
                         </p>
