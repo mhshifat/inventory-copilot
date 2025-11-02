@@ -1,4 +1,4 @@
-import { redisClient } from '@/lib/redis.server';
+import { redisClient } from '../../lib/redis.server';
 import { Queue } from 'bullmq';
 
 export const QUEUE_NAMES = {

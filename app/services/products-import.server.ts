@@ -1,13 +1,10 @@
 import path from 'path';
-import { fileURLToPath } from "url";
-import { shopifyGraphqlRequest } from "@/lib/shopify-graphql-request.server";
+import { shopifyGraphqlRequest } from "../lib/shopify-graphql-request.server";
 import { BaseService } from "./base-srv.server";
 import { ShopifyUtils } from "./shopify-utils.server";
-import prisma from '@/lib/db.server';
+import prisma from '../lib/db.server';
 import { SyncLogStatus, SyncLogType } from '@prisma/client';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export interface ImportProductsPayload {
 }
@@ -141,7 +138,7 @@ export class ProductsImportService extends BaseService {
                 throw new Error("No result URL found after bulk operation completion.");
             }
             await this.updateProgress("Step 2: Bulk operation completed, downloading data...", 40);
-            const downloadPath = path.resolve(__dirname, '../../downloads', `products-${this.shop}.jsonl`);
+            const downloadPath = path.resolve(process.cwd(), 'downloads', `products-${this.shop}.jsonl`);
             await ShopifyUtils.downloadBulkOperationData(result, downloadPath, {}, {
                 log: (message: string) => this.log(message)
             });

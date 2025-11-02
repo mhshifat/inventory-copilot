@@ -1,6 +1,6 @@
-import { disconnectPrisma } from '@/lib/db.server';
-import { pubRedisConnection, redisClient } from '@/lib/redis.server';
-import { createProductsImportWorker } from '@/services/workers/import-products-worker.server';
+import { disconnectPrisma } from './app/lib/db.server';
+import { pubRedisConnection, redisClient } from './app/lib/redis.server';
+import { createProductsImportWorker } from './app/services/workers/import-products-worker.server';
 import * as dotenv from 'dotenv';
 dotenv.config();
 

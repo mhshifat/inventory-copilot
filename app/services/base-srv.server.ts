@@ -1,5 +1,5 @@
-import { Logger } from "@/lib/logger.server";
-import { pubRedisConnection } from "@/lib/redis.server";
+import { Logger } from "../lib/logger.server";
+import { pubRedisConnection } from "../lib/redis.server";
 
 export class BaseService {
     constructor(

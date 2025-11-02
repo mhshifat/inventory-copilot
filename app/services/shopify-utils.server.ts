@@ -4,8 +4,8 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { setTimeout as delay } from 'timers/promises';
 
-import { shopifyGraphqlRequest } from "@/lib/shopify-graphql-request.server";
-import { sleep } from "@/lib/utils";
+import { shopifyGraphqlRequest } from "../lib/shopify-graphql-request.server";
+import { sleep } from "../lib/utils";
 
 const streamPipeline = promisify(pipeline);
 

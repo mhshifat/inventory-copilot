@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
 import { importProductsQueue, QUEUE_NAMES } from './queues.server';
-import { redisClient } from '@/lib/redis.server';
-import { Logger } from '@/lib/logger.server';
+import { redisClient } from '../../lib/redis.server';
+import { Logger } from '../../lib/logger.server';
 import { ProductsImportService } from '../products-import.server';
 
 export interface IProductsImportJobData {
