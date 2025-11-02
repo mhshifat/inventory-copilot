@@ -1,21 +1,21 @@
+import { useSSE } from "@/components/providers/sse";
 import PreviewError from "@/components/shared/preview-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import useFetch from "@/hooks/use-fetch";
 import type { ApiResponse } from "@/lib/api-response";
+import { useNavigate } from "@remix-run/react";
 import { DownloadIcon, PackageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useEventSource } from "remix-utils/sse/react";
-import { useNavigate } from "@remix-run/react";
 
 export default function ImportProducts() {
     const navigate = useNavigate();
     const [isImporting, setIsImporting] = useState(false);
     const [progress, setProgress] = useState(0);
     const { error, fetch: handleImports } = useFetch("/api/import-products");
-    const eventData = useEventSource('/api/sse');
+    const { eventData } = useSSE();
 
     const handleImport = () => {
         setIsImporting(true);
@@ -46,7 +46,7 @@ export default function ImportProducts() {
                 console.error("Failed to parse event data:", err);
             }
         }
-    }, [eventData]);
+    }, [eventData, navigate]);
 
     if (error) return <PreviewError error={error} />;
     return (
