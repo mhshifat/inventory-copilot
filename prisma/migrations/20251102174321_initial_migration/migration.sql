@@ -78,6 +78,23 @@ CREATE TABLE "sync_logs" (
     CONSTRAINT "sync_logs_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "settings" (
+    "id" SERIAL NOT NULL,
+    "forecast_period" TEXT NOT NULL,
+    "default_lead_time" TEXT NOT NULL,
+    "low_stock_threshold" TEXT NOT NULL,
+    "email_alerts_enabled" BOOLEAN NOT NULL,
+    "alert_email" TEXT,
+    "in_app_alerts_enabled" BOOLEAN NOT NULL,
+    "units" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "shop_id" INTEGER NOT NULL,
+
+    CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "sessions_shop_idx" ON "sessions"("shop");
 
@@ -93,6 +110,9 @@ CREATE UNIQUE INDEX "products_shopify_id_key" ON "products"("shopify_id");
 -- CreateIndex
 CREATE UNIQUE INDEX "variants_shopify_id_key" ON "variants"("shopify_id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "settings_shop_id_key" ON "settings"("shop_id");
+
 -- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -104,3 +124,6 @@ ALTER TABLE "variants" ADD CONSTRAINT "variants_shop_id_fkey" FOREIGN KEY ("shop
 
 -- AddForeignKey
 ALTER TABLE "sync_logs" ADD CONSTRAINT "sync_logs_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "settings" ADD CONSTRAINT "settings_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;

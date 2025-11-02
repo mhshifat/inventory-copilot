@@ -57,6 +57,8 @@ model Shop {
   variants          Variant[]
   sync_logs         SyncLog[]
 
+  settings          Setting?
+
   @@map("shops")
 }
 
@@ -114,4 +116,24 @@ model SyncLog {
   shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("sync_logs")
+}
+
+model Setting {
+  id                        Int         @id @default(autoincrement())
+
+  forecast_period           String
+  default_lead_time         String
+  low_stock_threshold       String
+  email_alerts_enabled      Boolean
+  alert_email               String?
+  in_app_alerts_enabled     Boolean
+  units                     String?
+
+  created_at                DateTime    @default(now())
+  updated_at                DateTime    @updatedAt
+
+  shop_id                   Int         @unique
+  shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("settings")
 }

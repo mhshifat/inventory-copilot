@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { ArrowRightIcon, CheckCircle2Icon, CircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { Setting } from "@prisma/client";
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const response = {
-    productsCount: 0
+    productsCount: 0,
+    settings: null as Pick<Setting, "id"> | null,
   }
 
   try {
@@ -22,6 +24,11 @@ export const loader = async (args: LoaderFunctionArgs) => {
       },
       select: {
         id: true,
+        settings: {
+          select: {
+            id: true
+          }
+        },
         _count: {
           select: {
             products: true
@@ -35,6 +42,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     }
     
     response.productsCount = shop._count.products;
+    response.settings = shop.settings;
     return response;
   } catch (err) {
     handleError(err);
@@ -66,14 +74,7 @@ export default function Index() {
       title: "Set your forecast preferences",
       description: "Customize your inventory alerts",
       route: "/app/settings",
-      completed: false,
-    },
-    {
-      id: "forecast",
-      title: "View your first forecast report",
-      description: "See AI-powered predictions",
-      route: "/app/import",
-      completed: false,
+      completed: loaderData.settings?.id ? true : false,
     },
   ]);
 

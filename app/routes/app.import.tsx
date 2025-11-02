@@ -80,12 +80,13 @@ export default function ImportProducts() {
                     {/* Button or Progress */}
                     {!isImporting ? (
                         <Button
+                            disabled={eventData === null}
                             onClick={handleImport}
                             size="lg"
                             className="w-full max-w-xs mx-auto"
                         >
                             <DownloadIcon className="mr-2 h-5 w-5" />
-                            Import Products
+                            {eventData === null ? "Waiting for Shopify..." : "Import Products"}
                         </Button>
                     ) : (
                         <div className="space-y-3 max-w-xs mx-auto">
