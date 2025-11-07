@@ -2,12 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangleIcon, PackageIcon, TrendingUpIcon } from "lucide-react";
 
 interface DashboardSummaryCardsProps {
-    products: Array<any>;
+    productsCount: number;
     lowStockCount: number;
     inventoryHealth: number;
 }
 
-export default function DashboardSummaryCards({ products, lowStockCount, inventoryHealth }: DashboardSummaryCardsProps) {
+export default function DashboardSummaryCards({ productsCount, lowStockCount, inventoryHealth }: DashboardSummaryCardsProps) {
     return (
         <div className="flex flex-col gap-6">
             <Card className="shadow-md flex-1" data-tour-id="stat-total">
@@ -16,7 +16,7 @@ export default function DashboardSummaryCards({ products, lowStockCount, invento
                     <PackageIcon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl! font-bold!">{products.length}</div>
+                    <div className="text-2xl! font-bold!">{productsCount}</div>
                     <p className="text-xs! text-muted-foreground mt-1!">Across all collections</p>
                 </CardContent>
             </Card>

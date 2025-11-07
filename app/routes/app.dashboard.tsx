@@ -28,6 +28,11 @@ export const loader = async (args: LoaderFunctionArgs) => {
     },
     vendors: [] as { label: string, value: string }[],
     collections: [] as { label: string, value: string }[],
+    productsSummary: {
+        totalProducts: 0,
+        inventoryHealthPercentage: 0,
+        lowStockCount: 0
+    }
   }
 
   try {
@@ -115,7 +120,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         FROM products_with_sales
     `;
 
-    const [productsCount, products, vendors, collections] = await Promise.all([
+    const [productsCount, products, vendors, collections, productsSummaryRes] = await Promise.all([
         prisma.$queryRawUnsafe(
             `
                 WITH products_with_sales_count AS (
@@ -156,9 +161,49 @@ export const loader = async (args: LoaderFunctionArgs) => {
                 collections: true,
             },
         }),
+        prisma.$queryRawUnsafe(
+            `
+                WITH products_with_sales AS (
+                    WITH products_with_sales AS (
+                        ${querySelect}
+        
+                        ${whereQuery}
+                    )
+        
+                    SELECT 
+                        COUNT(*) as total_products,
+                        SUM(
+                            CASE 
+                                WHEN stock_status = 'LOW_STOCK' OR stock_status = 'STOCK_OUT' 
+                                    THEN 1 
+                                    ELSE 0 
+                                END
+                        ) as low_stock_count,
+                        SUM(
+                            CASE 
+                                WHEN stock_status = 'IN_STOCK' THEN 1 
+                                ELSE 0 
+                            END
+                        ) as in_stock_count
+                    FROM products_with_sales
+                )
+
+                SELECT 
+                    *,
+                    ROUND(
+                        (in_stock_count::numeric / NULLIF(total_products, 0)) * 100
+                    ) as inventory_health_percentage 
+                FROM products_with_sales;
+            `
+        ),
     ]);
 
     const productsCountNumber = Number((productsCount as { count: bigint }[])[0]?.count || BigInt(0));
+    const productsSummary = (productsSummaryRes as {
+        total_products: bigint,
+        low_stock_count: bigint,
+        inventory_health_percentage: bigint
+    }[])[0];
     const transformProduct = (product: {
         id: number,
         shopify_id: bigint,
@@ -216,6 +261,12 @@ export const loader = async (args: LoaderFunctionArgs) => {
         label: col,
         value: col,
     }));
+    response.productsSummary = {
+        totalProducts: Number(productsSummary?.total_products || BigInt(0)),
+        inventoryHealthPercentage: Number(productsSummary?.inventory_health_percentage || BigInt(0)),
+        lowStockCount: Number(productsSummary?.low_stock_count || BigInt(0)),
+    };
+
     return response;
   } catch (err) {
     handleError(err);
@@ -239,19 +290,16 @@ export default function Dashboard() {
     const pagination = loaderData.products.pagination;
     const vendors = loaderData.vendors;
     const collections = loaderData.collections;
+    const productsSummary = loaderData.productsSummary;
+    const lowStockCount = productsSummary.lowStockCount;
+    const inventoryHealth = productsSummary.inventoryHealthPercentage;
+    const productsCount = productsSummary.totalProducts;
 
 
     const handleSyncInventory = () => {
         revalidator.revalidate();
         toast.info("Syncing inventory data...");
     };
-
-
-    // Calculate summary stats
-    const lowStockCount = products.filter((p) => p.status === "LOW_STOCK" || p.status === "STOCK_OUT").length;
-    const inventoryHealth = Math.round(
-        (products.filter((p) => p.status === "IN_STOCK").length / products.length) * 100
-    );
 
     return (
         <TooltipProvider>
@@ -287,7 +335,7 @@ export default function Dashboard() {
                         <DashboardSummaryCards
                             lowStockCount={lowStockCount}
                             inventoryHealth={inventoryHealth}
-                            products={products}
+                            productsCount={productsCount}
                         />
 
                         {/* AI Forecast Widget */}
