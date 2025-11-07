@@ -7,7 +7,7 @@ import DashboardHeader from '@/components/modules/dashboard/dashboard-header';
 import DashboardLowStockAlert from '@/components/modules/dashboard/dashboard-low-stock-alert';
 import DashboardConfigureAlertsAlert from '@/components/modules/dashboard/dashboard-configure-alerts-alert';
 import DashboardCustomizeSettingsAlert from '@/components/modules/dashboard/dashboard-customize-settings-alert';
-import DashboardAiForecastWidget from '@/components/modules/dashboard/dashboard-ai-forecast-widget';
+import DashboardAiForecastWidget, { ForecastProduct } from '@/components/modules/dashboard/dashboard-ai-forecast-widget';
 import DashboardSummaryCards from '@/components/modules/dashboard/dashboard-summary-cards';
 import DashboardProductsTable, { type DashboardProductsTableData } from '@/components/modules/dashboard/dashboard-products-table';
 import useFilter from '@/hooks/use-filter';
@@ -32,7 +32,8 @@ export const loader = async (args: LoaderFunctionArgs) => {
         totalProducts: 0,
         inventoryHealthPercentage: 0,
         lowStockCount: 0
-    }
+    },
+    aiForecast: [] as ForecastProduct[],
   }
 
   try {
@@ -97,7 +98,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                     CASE
                         WHEN avg_daily_sales > 0
                             THEN CEIL(total_inventory::numeric / avg_daily_sales)
-                            ELSE 0
+                            ELSE null
                     END as days_until_out,
                     (COALESCE(avg_daily_sales, 0) * ${leadTimeDays}) as suggested_reorder
                 FROM avgSales
@@ -106,9 +107,11 @@ export const loader = async (args: LoaderFunctionArgs) => {
             SELECT 
                 *,
                 CASE
+                    WHEN days_until_out IS NULL 
+                        THEN 'IN_STOCK'
                     WHEN (COALESCE(days_until_out, 0)) = 0 
                         THEN 'STOCK_OUT'
-                    WHEN days_until_out <= 7 
+                    WHEN (COALESCE(days_until_out, 0)) <= 7 
                         THEN 'LOW_STOCK'
                     ELSE 
                         'IN_STOCK'
@@ -120,7 +123,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         FROM products_with_sales
     `;
 
-    const [productsCount, products, vendors, collections, productsSummaryRes] = await Promise.all([
+    const [productsCount, products, vendors, collections, productsSummaryRes, aiForecastRes] = await Promise.all([
         prisma.$queryRawUnsafe(
             `
                 WITH products_with_sales_count AS (
@@ -196,6 +199,35 @@ export const loader = async (args: LoaderFunctionArgs) => {
                 FROM products_with_sales;
             `
         ),
+        prisma.$queryRawUnsafe(
+            `
+                WITH products_with_sales_count AS (
+                    ${querySelect}
+
+                    ${whereQuery}
+                )
+
+                SELECT
+                    id,
+                    title,
+                    total_inventory as stock,
+                    days_until_out as predicted_days_to_stockout,
+                    CASE
+                        WHEN days_until_out <= 3 THEN 'CRITICAL'
+                        WHEN days_until_out <= 7 THEN 'HIGH'
+                        WHEN days_until_out <= 14 THEN 'MODERATE'
+                        ELSE 'LOW'
+                    END as risk_level,
+                    CASE
+                        WHEN total_inventory = 0 THEN 100
+                        WHEN days_until_out = 0 THEN 100
+                        ELSE LEAST(100, CEIL(((CAST(${leadTimeDays} AS numeric) / NULLIF(days_until_out, 0)) * 100)))
+                    END as stockout_percentage
+                FROM products_with_sales_count
+                ORDER BY predicted_days_to_stockout ASC
+                LIMIT 5
+            `
+        ),
     ]);
 
     const productsCountNumber = Number((productsCount as { count: bigint }[])[0]?.count || BigInt(0));
@@ -217,7 +249,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         shop_id: number,
         total_units_sold: bigint,
         avg_daily_sales: number,
-        days_until_out: number,
+        days_until_out: number | null,
         suggested_reorder: number,
         stock_status: "STOCK_OUT" | "LOW_STOCK" | "IN_STOCK",
     }): DashboardProductsTableData => {
@@ -229,7 +261,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
             image: product?.image || "https://placehold.co/40x40/png",
             stock: product?.total_inventory ?? 0,
             avgDailySales: product?.avg_daily_sales ?? 0,
-            daysUntilOut: product?.days_until_out ?? 0,
+            daysUntilOut: product?.days_until_out || Infinity,
             suggestedReorder: product?.suggested_reorder ?? 0,
             status: product.stock_status,
         }
@@ -237,6 +269,24 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
     if ((products as []).length === 0) {
         return redirect('/app');
+    }
+
+    const transformForecastProduct = (product: {
+        id: number,
+        title: string,
+        stock: number | null,
+        predicted_days_to_stockout: number,
+        risk_level: "CRITICAL" | "HIGH" | "MODERATE",
+        stockout_percentage: number,
+    }): ForecastProduct => {
+        return {
+            id: product.id.toString(),
+            title: product?.title || "Untitled Product",
+            stock: product?.stock ?? 0,
+            predictedDaysToStockout: product?.predicted_days_to_stockout ?? 0,
+            riskLevel: product?.risk_level || "MODERATE",
+            stockoutPercentage: product?.stockout_percentage ?? 0,
+        }
     }
 
     response.products.list = (products as []).map((p) => transformProduct(p));
@@ -266,6 +316,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         inventoryHealthPercentage: Number(productsSummary?.inventory_health_percentage || BigInt(0)),
         lowStockCount: Number(productsSummary?.low_stock_count || BigInt(0)),
     };
+    response.aiForecast = (aiForecastRes as []).map((p) => transformForecastProduct(p));
 
     return response;
   } catch (err) {
@@ -294,6 +345,7 @@ export default function Dashboard() {
     const lowStockCount = productsSummary.lowStockCount;
     const inventoryHealth = productsSummary.inventoryHealthPercentage;
     const productsCount = productsSummary.totalProducts;
+    const aiForecast = loaderData.aiForecast;
 
 
     const handleSyncInventory = () => {
@@ -340,7 +392,10 @@ export default function Dashboard() {
 
                         {/* AI Forecast Widget */}
                         <div className="lg:col-span-1" data-tour-id="ai-forecast">
-                            <DashboardAiForecastWidget onViewAll={() => navigate("/reports")} />
+                            <DashboardAiForecastWidget
+                                aiForecastData={aiForecast}
+                                onViewAll={() => navigate("/reports")}
+                            />
                         </div>
                     </div>
 

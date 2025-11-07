@@ -159,14 +159,14 @@ export default function DashboardProductsTable({ data, pagination, onPageChange 
                                     <TableCell>
                                         <span
                                             className={
-                                                product.daysUntilOut <= 7
+                                                product.daysUntilOut !== null && product.daysUntilOut <= 7
                                                     ? "text-destructive font-semibold!"
-                                                    : product.daysUntilOut <= 30
+                                                    : product.daysUntilOut !== null && product.daysUntilOut <= 30
                                                         ? "text-warning font-semibold!"
                                                         : ""
                                             }
                                         >
-                                            {product.daysUntilOut} days
+                                            {product.daysUntilOut ? `${product.daysUntilOut} days` : `∞`}
                                         </span>
                                     </TableCell>
                                     <TableCell>{product.suggestedReorder}</TableCell>

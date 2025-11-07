@@ -4,65 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ChevronRightIcon, SparklesIcon, TrendingDownIcon } from "lucide-react";
 
-interface ForecastProduct {
+export interface ForecastProduct {
   id: string;
   title: string;
   stock: number;
   predictedDaysToStockout: number;
-  riskLevel: "critical" | "high" | "moderate";
+  riskLevel: "CRITICAL" | "HIGH" | "MODERATE";
   stockoutPercentage: number;
 }
 
-const mockForecastData: ForecastProduct[] = [
-  {
-    id: "1",
-    title: "Wireless Earbuds Pro",
-    stock: 8,
-    predictedDaysToStockout: 1.5,
-    riskLevel: "critical",
-    stockoutPercentage: 95,
-  },
-  {
-    id: "2",
-    title: "Smart Watch X200",
-    stock: 15,
-    predictedDaysToStockout: 3,
-    riskLevel: "critical",
-    stockoutPercentage: 85,
-  },
-  {
-    id: "3",
-    title: "USB-C Hub Adapter",
-    stock: 22,
-    predictedDaysToStockout: 4.5,
-    riskLevel: "high",
-    stockoutPercentage: 70,
-  },
-  {
-    id: "4",
-    title: "Portable Charger 20000mAh",
-    stock: 28,
-    predictedDaysToStockout: 5,
-    riskLevel: "high",
-    stockoutPercentage: 65,
-  },
-  {
-    id: "5",
-    title: "Bluetooth Speaker Mini",
-    stock: 35,
-    predictedDaysToStockout: 6,
-    riskLevel: "moderate",
-    stockoutPercentage: 55,
-  },
-];
-
 const getRiskColor = (riskLevel: string) => {
   switch (riskLevel) {
-    case "critical":
+    case "CRITICAL":
       return "bg-destructive";
-    case "high":
+    case "HIGH":
       return "bg-warning";
-    case "moderate":
+    case "MODERATE":
       return "bg-chart-2";
     default:
       return "bg-muted";
@@ -71,11 +28,11 @@ const getRiskColor = (riskLevel: string) => {
 
 const getRiskBadgeColor = (riskLevel: string) => {
   switch (riskLevel) {
-    case "critical":
+    case "CRITICAL":
       return "bg-destructive text-destructive-foreground";
-    case "high":
+    case "HIGH":
       return "bg-warning text-warning-foreground";
-    case "moderate":
+    case "MODERATE":
       return "bg-chart-2 text-chart-2-foreground";
     default:
       return "";
@@ -84,9 +41,10 @@ const getRiskBadgeColor = (riskLevel: string) => {
 
 interface DashboardAIForecastWidgetProps {
   onViewAll?: () => void;
+  aiForecastData: ForecastProduct[];
 }
 
-export default function DashboardAiForecastWidget({ onViewAll }: DashboardAIForecastWidgetProps) {
+export default function DashboardAiForecastWidget({ onViewAll, aiForecastData }: DashboardAIForecastWidgetProps) {
     return (
     <Card className="shadow-md animate-fade-in border-l-4 border-l-primary">
       <CardHeader className="pb-3!">
@@ -112,7 +70,7 @@ export default function DashboardAiForecastWidget({ onViewAll }: DashboardAIFore
       <CardContent className="space-y-4">
         {/* Forecast Items */}
         <div className="space-y-4">
-          {mockForecastData.map((product, index) => (
+          {aiForecastData.map((product, index) => (
             <div
               key={product.id}
               className="space-y-2 animate-fade-in"
