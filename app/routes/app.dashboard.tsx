@@ -13,6 +13,9 @@ import useFilter from '@/hooks/use-filter';
 import DashboardTableFilters from '@/components/modules/dashboard/dashboard-table-filters';
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Setting } from "@prisma/client";
+import useTour from "@/hooks/use-tour";
+import Tour from "@/components/shared/tour";
+import { tourSteps } from "@/components/modules/dashboard/constants";
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const response = {
@@ -333,7 +336,7 @@ export default function Dashboard() {
     const { filter: filterData } = useFilter();
     const loaderData = useLoaderData<typeof loader>();
     const revalidator = useRevalidator();
-    // const { isTourOpen, startTour, closeTour, completeTour } = useTour();
+    const { isTourOpen, startTour, closeTour, completeTour } = useTour();
 
     const products = loaderData.products.list;
     const pagination = loaderData.products.pagination;
@@ -359,6 +362,7 @@ export default function Dashboard() {
                     {/* Header */}
                     <DashboardHeader
                         handleSyncInventory={handleSyncInventory}
+                        onStartTour={startTour}
                     />
 
                     {/* Contextual Hint Banners */}
@@ -411,12 +415,12 @@ export default function Dashboard() {
                 </div>
 
                 {/* Tour Component */}
-                {/* <Tour 
-            steps={tourSteps} 
-            isOpen={isTourOpen} 
-            onClose={closeTour}
-            onComplete={completeTour}
-        /> */}
+                <Tour 
+                    steps={tourSteps} 
+                    isOpen={isTourOpen} 
+                    onClose={closeTour}
+                    onComplete={completeTour}
+                />
             </div>
         </TooltipProvider>
     );

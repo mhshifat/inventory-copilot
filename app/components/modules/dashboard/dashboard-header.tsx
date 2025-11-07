@@ -3,11 +3,13 @@ import { useNavigate } from "@remix-run/react";
 import { BarChart3Icon, BellIcon, Building2Icon, HelpCircleIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
 
 interface DashboardHeaderProps {
-    handleSyncInventory: () => void
+    handleSyncInventory: () => void;
+    onStartTour: () => void;
 }
 
 export default function DashboardHeader({
-    handleSyncInventory
+    handleSyncInventory,
+    onStartTour
 }: DashboardHeaderProps) {
     const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    // onClick={startTour}
+                    onClick={onStartTour}
                     className="gap-2"
                 >
                     <HelpCircleIcon className="h-4 w-4" />
