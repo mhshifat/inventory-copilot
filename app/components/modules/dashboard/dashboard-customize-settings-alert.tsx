@@ -16,7 +16,7 @@ export default function DashboardCustomizeSettingsAlert() {
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/settings")}
+                    onClick={() => navigate("/app/settings")}
                     className="shrink-0 ml-auto!"
                 >
                     Go to Settings

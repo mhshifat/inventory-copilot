@@ -55,9 +55,10 @@ interface DashboardProductsTableProps {
         hasPreviousPage: boolean;
     }
     onPageChange?: (page: number) => void;
+    forecastPeriod?: string;
 }
 
-export default function DashboardProductsTable({ data, pagination, onPageChange }: DashboardProductsTableProps) {
+export default function DashboardProductsTable({ data, pagination, onPageChange, forecastPeriod }: DashboardProductsTableProps) {
     const navigate = useNavigate();
 
     const currentPage = pagination.page;
@@ -92,7 +93,7 @@ export default function DashboardProductsTable({ data, pagination, onPageChange 
                                                 <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                                             </TooltipTrigger>
                                             <TooltipContent className="max-w-xs">
-                                                <p>Calculated from the past 30 days of orders.</p>
+                                                <p>Calculated from the past {forecastPeriod || 30} days of orders.</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </div>
@@ -166,7 +167,19 @@ export default function DashboardProductsTable({ data, pagination, onPageChange 
                                                         : ""
                                             }
                                         >
-                                            {product.daysUntilOut ? `${product.daysUntilOut} days` : `∞`}
+                                            {product.daysUntilOut ? `${product.daysUntilOut} days` : (
+                                                <div className="items-center flex gap-1">
+                                                    <span>∞</span>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-xs">
+                                                            <p>Here infinity is used to represent an unknown or unbounded value. Means current stock is not decreasing and will last indefinitely.</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            )}
                                         </span>
                                     </TableCell>
                                     <TableCell>{product.suggestedReorder}</TableCell>

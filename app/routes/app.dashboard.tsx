@@ -7,12 +7,13 @@ import DashboardHeader from '@/components/modules/dashboard/dashboard-header';
 import DashboardLowStockAlert from '@/components/modules/dashboard/dashboard-low-stock-alert';
 import DashboardConfigureAlertsAlert from '@/components/modules/dashboard/dashboard-configure-alerts-alert';
 import DashboardCustomizeSettingsAlert from '@/components/modules/dashboard/dashboard-customize-settings-alert';
-import DashboardAiForecastWidget, { ForecastProduct } from '@/components/modules/dashboard/dashboard-ai-forecast-widget';
+import DashboardAiForecastWidget, { type ForecastProduct } from '@/components/modules/dashboard/dashboard-ai-forecast-widget';
 import DashboardSummaryCards from '@/components/modules/dashboard/dashboard-summary-cards';
 import DashboardProductsTable, { type DashboardProductsTableData } from '@/components/modules/dashboard/dashboard-products-table';
 import useFilter from '@/hooks/use-filter';
 import DashboardTableFilters from '@/components/modules/dashboard/dashboard-table-filters';
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { Setting } from "@prisma/client";
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const response = {
@@ -34,6 +35,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         lowStockCount: 0
     },
     aiForecast: [] as ForecastProduct[],
+    settings: null as Setting | null,
   }
 
   try {
@@ -44,6 +46,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
       },
       select: {
         id: true,
+        settings: true,
       }
     });
 
@@ -59,8 +62,8 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const vendor = searchParams.get("vendor");
     const collection = searchParams.get("collection");
 
-    const forecastPeriod = 30; // days
-    const leadTimeDays = 14; // days
+    const forecastPeriod = shop.settings?.forecast_period || 30; // days
+    const leadTimeDays = shop.settings?.default_lead_time || 14; // days
 
     const whereQuery = `
         WHERE
@@ -317,6 +320,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         lowStockCount: Number(productsSummary?.low_stock_count || BigInt(0)),
     };
     response.aiForecast = (aiForecastRes as []).map((p) => transformForecastProduct(p));
+    response.settings = shop.settings || null;
 
     return response;
   } catch (err) {
@@ -330,12 +334,9 @@ export default function Dashboard() {
     const { filter: filterData } = useFilter();
     const loaderData = useLoaderData<typeof loader>();
     const revalidator = useRevalidator();
-    console.log({ loaderData });
     // const { isTourOpen, startTour, closeTour, completeTour } = useTour();
 
-    // Contextual hints state
     const alertsConfigured = false;
-    const settingsCustomized = false;   
 
     const products = loaderData.products.list;
     const pagination = loaderData.products.pagination;
@@ -346,6 +347,7 @@ export default function Dashboard() {
     const inventoryHealth = productsSummary.inventoryHealthPercentage;
     const productsCount = productsSummary.totalProducts;
     const aiForecast = loaderData.aiForecast;
+    const settings = loaderData.settings;
 
 
     const handleSyncInventory = () => {
@@ -377,7 +379,7 @@ export default function Dashboard() {
                         )}
 
                         {/* Settings Customization */}
-                        {!settingsCustomized && (
+                        {!settings && (
                             <DashboardCustomizeSettingsAlert />
                         )}
                     </div>
@@ -408,6 +410,7 @@ export default function Dashboard() {
                     {/* Products Table */}
                     <DashboardProductsTable
                         data={products}
+                        forecastPeriod={settings?.forecast_period || "30"}
                         pagination={pagination}
                         onPageChange={(page) => filterData({
                             page: page.toString()

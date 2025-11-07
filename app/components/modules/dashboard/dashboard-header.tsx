@@ -43,7 +43,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/reports")}
+                    onClick={() => navigate("/app/reports")}
                     className="gap-2"
                     data-tour-id="reports-button"
                 >
@@ -54,7 +54,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/suppliers")}
+                    onClick={() => navigate("/app/suppliers")}
                     className="gap-2"
                     data-tour-id="suppliers-button"
                 >
@@ -65,7 +65,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/alerts")}
+                    onClick={() => navigate("/app/alerts")}
                     className="gap-2"
                     data-tour-id="alerts-button"
                 >
@@ -76,7 +76,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/help")}
+                    onClick={() => navigate("/app/help")}
                     className="gap-2"
                 >
                     <HelpCircleIcon className="h-4 w-4" />
@@ -86,7 +86,7 @@ export default function DashboardHeader({
                     // @ts-ignore
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/settings")}
+                    onClick={() => navigate("/app/settings")}
                     className="gap-2"
                     data-tour-id="settings-button"
                 >
