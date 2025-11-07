@@ -5,7 +5,6 @@ import { authenticate, handleError } from '@/shopify.server';
 import prisma from '@/lib/db.server';
 import DashboardHeader from '@/components/modules/dashboard/dashboard-header';
 import DashboardLowStockAlert from '@/components/modules/dashboard/dashboard-low-stock-alert';
-import DashboardConfigureAlertsAlert from '@/components/modules/dashboard/dashboard-configure-alerts-alert';
 import DashboardCustomizeSettingsAlert from '@/components/modules/dashboard/dashboard-customize-settings-alert';
 import DashboardAiForecastWidget, { type ForecastProduct } from '@/components/modules/dashboard/dashboard-ai-forecast-widget';
 import DashboardSummaryCards from '@/components/modules/dashboard/dashboard-summary-cards';
@@ -336,8 +335,6 @@ export default function Dashboard() {
     const revalidator = useRevalidator();
     // const { isTourOpen, startTour, closeTour, completeTour } = useTour();
 
-    const alertsConfigured = false;
-
     const products = loaderData.products.list;
     const pagination = loaderData.products.pagination;
     const vendors = loaderData.vendors;
@@ -371,11 +368,6 @@ export default function Dashboard() {
                             <DashboardLowStockAlert
                                 lowStockCount={lowStockCount}
                             />
-                        )}
-
-                        {/* Alerts Not Configured */}
-                        {!alertsConfigured && (
-                            <DashboardConfigureAlertsAlert />
                         )}
 
                         {/* Settings Customization */}

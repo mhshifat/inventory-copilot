@@ -42,7 +42,7 @@ const emptyStateConfig = {
   },
 };
 
-export const DashboardEmptyState = ({
+export const EmptyState = ({
   type = "inventory",
   title,
   description,

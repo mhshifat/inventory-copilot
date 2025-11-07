@@ -106,7 +106,10 @@ export default function OnboardingComplete() {
                         <div className="pt-4! animate-fade-in" style={{ animationDelay: "0.4s" }}>
                             <Button
                                 size="lg"
-                                onClick={() => navigate("/app/dashboard")}
+                                onClick={() => {
+                                    localStorage.setItem("onboardingComplete", "true");
+                                    navigate("/app/dashboard");
+                                }}
                                 className="text-lg! px-8! py-6! shadow-lg hover:shadow-xl transition-all hover:scale-105"
                             >
                                 Go to Dashboard

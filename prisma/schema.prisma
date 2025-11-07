@@ -58,6 +58,7 @@ model Shop {
   variants          Variant[]
   orders            Order[]
   sync_logs         SyncLog[]
+  alerts            Alert[]
 
   settings          Setting?
 
@@ -83,6 +84,7 @@ model Product {
 
   variants          Variant[]
   line_items        LineItem[]
+  alerts            Alert[]
 
   @@index([vendor])
   @@index([collections], type: Gin)
@@ -177,4 +179,36 @@ model Setting {
   shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("settings")
+}
+
+enum AlertSeverity {
+  CRITICAL
+  WARNING
+  RESTOCKED
+}
+
+enum AlertStatus {
+  UNREAD
+  RESOLVED
+}
+
+model Alert {
+  id                        Int         @id @default(autoincrement())
+
+  productName               String
+  productImage              String
+  message                   String
+  severity                  AlertSeverity
+  status                    AlertStatus @default(UNREAD)
+
+  created_at                DateTime    @default(now())
+  updated_at                DateTime    @updatedAt
+
+  product_id                Int
+  product                   Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  shop_id                   Int         
+  shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
 }

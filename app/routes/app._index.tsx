@@ -2,7 +2,7 @@ import prisma from "@/lib/db.server";
 import { authenticate, handleError } from "@/shopify.server";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,14 +10,29 @@ import { ArrowRightIcon, CheckCircle2Icon, CircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Setting } from "@prisma/client";
 
+interface OnboardingStep {
+  id: string;
+  title: string;
+  description: string;
+  route: string;
+  completed: boolean;
+}
+
 export const loader = async (args: LoaderFunctionArgs) => {
   const response = {
     productsCount: 0,
     settings: null as Pick<Setting, "id"> | null,
+    steps: {
+      sync: {},
+      settings: {}
+    } as {
+      sync: OnboardingStep;
+      settings: OnboardingStep;
+    },
   }
 
   try {
-    const { session } = await authenticate.admin(args.request);
+    const { session, redirect } = await authenticate.admin(args.request);
     const shop = await prisma.shop.findUnique({
       where: {
         domain: session.shop
@@ -43,6 +58,25 @@ export const loader = async (args: LoaderFunctionArgs) => {
     
     response.productsCount = shop._count.products;
     response.settings = shop.settings;
+
+    response.steps.sync = {
+      id: "sync",
+      title: "Sync your Shopify inventory data",
+      description: "Connect your store to get started.",
+      route: "/app/import",
+      completed: shop._count.products > 0,
+    };
+    response.steps.settings = {
+      id: "preferences",
+      title: "Set your forecast preferences",
+      description: "Set up your preferences for inventory forecasting.",
+      route: "/app/settings",
+      completed: !!shop.settings,
+    };
+
+    const allCompleted = Object.values(response.steps).every(step => step.completed);
+
+    if (allCompleted) return redirect("/app/dashboard");
     return response;
   } catch (err) {
     handleError(err);
@@ -61,23 +95,8 @@ interface OnboardingStep {
 export default function Index() {
   const navigate = useNavigate();
   const loaderData =  useLoaderData<typeof loader>();
-  const [steps, setSteps] = useState<OnboardingStep[]>([
-    {
-      id: "sync",
-      title: "Sync your Shopify inventory data",
-      description: "Connect your store to get started",
-      route: "/app/import",
-      completed: loaderData.productsCount > 0,
-    },
-    {
-      id: "preferences",
-      title: "Set your forecast preferences",
-      description: "Customize your inventory alerts",
-      route: "/app/settings",
-      completed: loaderData.settings?.id ? true : false,
-    },
-  ]);
-
+  
+  const steps = loaderData.steps ? Object.values(loaderData.steps) : [];
   const completedSteps = steps.filter((step) => step.completed).length;
   const progress = (completedSteps / steps.length) * 100;
   const allCompleted = completedSteps === steps.length;
@@ -114,11 +133,7 @@ export default function Index() {
   }, [allCompleted]);
 
   const handleStepAction = (step: OnboardingStep) => {
-    // Mark as completed and navigate
-    setSteps((prev) =>
-      prev.map((s) => (s.id === step.id ? { ...s, completed: true } : s))
-    );
-    setTimeout(() => navigate(step.route), 500);
+    navigate(step.route);
   };
 
   return (
@@ -213,20 +228,6 @@ export default function Index() {
               </Button>
             </CardContent>
           </Card>
-        )}
-
-        {/* Skip Option */}
-        {!allCompleted && (
-          <div className="text-center mt-6!">
-            <Button
-              // @ts-ignore
-              variant="ghost"
-              onClick={() => navigate("/app/dashboard")}
-              className="text-muted-foreground"
-            >
-              Skip for now
-            </Button>
-          </div>
         )}
       </div>
     </div>

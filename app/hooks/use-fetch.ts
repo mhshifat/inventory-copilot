@@ -3,8 +3,8 @@ import { useCallback, useState } from "react";
 export default function useFetch(url: string) {
     const [error, setError] = useState("");
 
-    const callApi = useCallback(() => {
-        return fetch(url, { method: "POST" })
+    const callApi = useCallback((payload: RequestInit = { method: "POST" }) => {
+        return fetch(url, payload)
             .then(async (response) => {
                 if (!response.ok) {
                     const text = await response.text();
