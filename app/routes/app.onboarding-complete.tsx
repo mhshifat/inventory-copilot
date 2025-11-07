@@ -81,7 +81,7 @@ export default function OnboardingComplete() {
                                 <div className="bg-primary/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto!">
                                     <TrendingUpIcon className="h-5 w-5 text-primary" />
                                 </div>
-                                <h3 className="font-semibold text-sm!">Smart Forecasting</h3>
+                                <h3 className="font-semibold! text-sm!">Smart Forecasting</h3>
                                 <p className="text-xs! text-muted-foreground">AI-powered predictions</p>
                             </div>
 
@@ -89,7 +89,7 @@ export default function OnboardingComplete() {
                                 <div className="bg-warning/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto!">
                                     <BellIcon className="h-5 w-5 text-warning" />
                                 </div>
-                                <h3 className="font-semibold text-sm!">Real-time Alerts</h3>
+                                <h3 className="font-semibold! text-sm!">Real-time Alerts</h3>
                                 <p className="text-xs! text-muted-foreground">Never miss a stockout</p>
                             </div>
 
@@ -97,7 +97,7 @@ export default function OnboardingComplete() {
                                 <div className="bg-info/10 rounded-full w-10 h-10 flex items-center justify-center mx-auto!">
                                     <BarChart3Icon className="h-5 w-5 text-info" />
                                 </div>
-                                <h3 className="font-semibold text-sm!">Detailed Reports</h3>
+                                <h3 className="font-semibold! text-sm!">Detailed Reports</h3>
                                 <p className="text-xs! text-muted-foreground">Actionable insights</p>
                             </div>
                         </div>

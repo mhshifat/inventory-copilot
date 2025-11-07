@@ -56,49 +56,49 @@ export default function DashboardAiForecastWidget({ onViewAll, aiForecastData }:
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 AI Forecast
-                <Badge variant="secondary" className="text-xs font-normal">
+                <Badge variant="secondary" className="text-xs! font-normal!">
                   Beta
                 </Badge>
               </CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5!">
+              <p className="text-xs! text-muted-foreground mt-0.5!">
                 Predicted stockouts in next 7 days
               </p>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4!">
         {/* Forecast Items */}
-        <div className="space-y-4">
+        <div className="space-y-4!">
           {aiForecastData.map((product, index) => (
             <div
               key={product.id}
-              className="space-y-2 animate-fade-in"
+              className="space-y-2! animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-medium truncate">
+                    <h4 className="text-sm! font-medium! truncate">
                       {product.title}
                     </h4>
                     <Badge
-                      className={`text-xs ${getRiskBadgeColor(product.riskLevel)}`}
+                      className={`text-xs! ${getRiskBadgeColor(product.riskLevel)}`}
                     >
                       {product.riskLevel}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-3 mt-1!">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs! text-muted-foreground">
                       {product.stock} units left
                     </span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs! text-muted-foreground flex items-center gap-1">
                       <TrendingDownIcon className="h-3 w-3" />
                       ~{product.predictedDaysToStockout} days
                     </span>
                   </div>
                 </div>
-                <span className="text-sm font-semibold tabular-nums whitespace-nowrap">
+                <span className="text-sm! font-semibold! tabular-nums whitespace-nowrap">
                   {product.stockoutPercentage}%
                 </span>
               </div>
@@ -129,7 +129,7 @@ export default function DashboardAiForecastWidget({ onViewAll, aiForecastData }:
         </Button>
 
         {/* Disclaimer */}
-        <p className="text-xs text-muted-foreground text-center pt-2! border-t border-border">
+        <p className="text-xs! text-muted-foreground text-center pt-2! border-t border-border">
           AI predictions based on historical sales data and current trends
         </p>
       </CardContent>

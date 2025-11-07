@@ -89,7 +89,7 @@ export default function AlertCard({ alert }: AlertCardProps) {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4 mb-2!">
                             <div>
-                                <h3 className="font-semibold text-lg! text-foreground mb-1!">
+                                <h3 className="font-semibold! text-lg! text-foreground mb-1!">
                                     {alert.productName}
                                 </h3>
                                 {getSeverityBadge(alert.severity)}

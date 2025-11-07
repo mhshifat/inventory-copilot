@@ -26,7 +26,7 @@ export default function AlertsLearnHowWorksDialog() {
                     </DialogTitle>
                     <DialogDescription className="text-left pt-4! space-y-4!">
                         <div className="flex gap-3">
-                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold text-sm">
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold! text-sm">
                                 1
                             </div>
                             <p className="text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export default function AlertsLearnHowWorksDialog() {
                         </div>
 
                         <div className="flex gap-3">
-                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold text-sm">
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold! text-sm">
                                 2
                             </div>
                             <p className="text-sm text-muted-foreground">
@@ -44,7 +44,7 @@ export default function AlertsLearnHowWorksDialog() {
                         </div>
 
                         <div className="flex gap-3">
-                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold text-sm">
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 font-semibold! text-sm">
                                 3
                             </div>
                             <p className="text-sm text-muted-foreground">

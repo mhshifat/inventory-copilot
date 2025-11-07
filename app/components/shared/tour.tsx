@@ -206,7 +206,7 @@ export default function Tour({ steps, isOpen, onClose, onComplete }: TourProps) 
                                     Step {currentStep + 1} of {steps.length}
                                 </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-foreground">
+                            <h3 className="text-lg font-semibold! text-foreground">
                                 {step.title}
                             </h3>
                         </div>
