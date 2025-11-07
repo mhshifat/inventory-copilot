@@ -22,6 +22,7 @@ enum SyncLogStatus {
 
 enum SyncLogType {
   PRODUCTS_IMPORT
+  ORDERS_IMPORT
 }
 
 model Session {
@@ -55,6 +56,7 @@ model Shop {
 
   products          Product[]
   variants          Variant[]
+  orders            Order[]
   sync_logs         SyncLog[]
 
   settings          Setting?
@@ -69,6 +71,7 @@ model Product {
   title             String?
   handle            String?
   vendor            String?
+  collections       String[]    @default([])
   image             String?
   total_inventory   Int?        @default(0)
 
@@ -79,7 +82,10 @@ model Product {
   shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   variants          Variant[]
+  line_items        LineItem[]
 
+  @@index([vendor])
+  @@index([collections], type: Gin)
   @@map("products")
 }
 
@@ -100,6 +106,41 @@ model Variant {
   shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("variants")
+}
+
+model Order {
+  id                Int         @id @default(autoincrement())
+
+  shopify_id        BigInt      @unique
+  total_units_sold  Int
+
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+
+  line_items       LineItem[]
+
+  shop_id           Int
+  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("orders")
+}
+
+model LineItem {
+  id                Int         @id @default(autoincrement())
+
+  shopify_id        BigInt      @unique
+  quantity          Int
+
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+
+  order_id           Int
+  order              Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  product_shopify_id BigInt
+  product            Product     @relation(fields: [product_shopify_id], references: [shopify_id], onDelete: Cascade)
+
+  @@map("line_items")
 }
 
 model SyncLog {

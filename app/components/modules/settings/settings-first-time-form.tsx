@@ -95,7 +95,7 @@ export default function SettingsFirstTimeForm() {
                                 }}
                             />
                             <p className="text-sm! text-muted-foreground flex items-start gap-2">
-                                <span className="text-primary mt-0.5">💡</span>
+                                <span className="text-primary mt-0.5!">💡</span>
                                 <span>
                                     We recommend 30 days for most businesses. This gives you enough time to order and receive inventory.
                                 </span>
@@ -141,7 +141,7 @@ export default function SettingsFirstTimeForm() {
                                 )}
                             />
                             <p className="text-sm! text-muted-foreground flex items-start gap-2">
-                                <span className="text-primary mt-0.5">💡</span>
+                                <span className="text-primary mt-0.5!">💡</span>
                                 <span>
                                     Include shipping time + supplier processing time. For example, if your supplier takes 10 days to ship and 4 days for delivery, enter 14.
                                 </span>
@@ -190,7 +190,7 @@ export default function SettingsFirstTimeForm() {
                             />
 
                             <p className="text-sm! text-muted-foreground flex items-start gap-2">
-                                <span className="text-primary mt-0.5">💡</span>
+                                <span className="text-primary mt-0.5!">💡</span>
                                 <span>
                                     We'll alert you when stock falls below this number. Set it high enough to reorder before you run out.
                                 </span>
@@ -201,7 +201,7 @@ export default function SettingsFirstTimeForm() {
             </Card>
 
             {/* Save Button */}
-            <div className="flex justify-between items-center mt-6">
+            <div className="flex justify-between items-center mt-6!">
                 <Button
                     // @ts-ignore
                     variant="ghost"
@@ -217,8 +217,8 @@ export default function SettingsFirstTimeForm() {
                     size="lg"
                     className="min-w-[200px] shadow-lg"
                 >
-                    {isLoading && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
-                    {!isLoading && <SaveIcon className="mr-2 h-4 w-4" />}
+                    {isLoading && <Loader2Icon className="mr-2! h-4 w-4 animate-spin" />}
+                    {!isLoading && <SaveIcon className="mr-2! h-4 w-4" />}
                     Save Settings
                 </Button>
             </div>

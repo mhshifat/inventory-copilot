@@ -123,10 +123,10 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-accent/30 to-background">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto! px-4! py-12! max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl! md:text-5xl! font-bold! text-foreground mb-4">
+        <div className="text-center mb-8! animate-fade-in">
+          <h1 className="text-4xl! md:text-5xl! font-bold! text-foreground mb-4!">
             👋 Welcome to Inventory Copilot!
           </h1>
           <p className="text-lg! text-muted-foreground">
@@ -135,8 +135,8 @@ export default function Index() {
         </div>
 
         {/* Progress Bar */}
-        <Card className="mb-8 animate-fade-in border-2">
-          <CardContent className="pt-6">
+        <Card className="mb-8! animate-fade-in border-2">
+          <CardContent className="pt-6!">
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm!">
                 <span className="font-medium! text-foreground">Overall Progress</span>
@@ -162,7 +162,7 @@ export default function Index() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="mt-1">
+                    <div className="mt-1!">
                       {step.completed ? (
                         <CheckCircle2Icon className="h-6 w-6 text-success animate-scale-in" />
                       ) : (
@@ -187,7 +187,7 @@ export default function Index() {
                       "Completed"
                     ) : (
                       <>
-                        Start <ArrowRightIcon className="ml-2 h-4 w-4" />
+                        Start <ArrowRightIcon className="ml-2! h-4 w-4" />
                       </>
                     )}
                   </Button>
@@ -199,12 +199,12 @@ export default function Index() {
 
         {/* Completion Message */}
         {allCompleted && (
-          <Card className="mt-8 border-success bg-success/5 animate-scale-in">
-            <CardContent className="pt-6 text-center flex flex-col items-center gap-5">
-              <h3 className="text-2xl! font-bold! text-success mb-2">
+          <Card className="mt-8! border-success bg-success/5 animate-scale-in">
+            <CardContent className="pt-6! text-center flex flex-col items-center gap-5">
+              <h3 className="text-2xl! font-bold! text-success mb-2!">
                 🎉 Congratulations!
               </h3>
-              <p className="text-muted-foreground mb-4 max-w-[50%] text-center ml-auto">
+              <p className="text-muted-foreground mb-4! max-w-[50%] text-center">
                 You've completed the onboarding process. You're all set to start
                 managing your inventory with AI-powered forecasts.
               </p>
@@ -217,7 +217,7 @@ export default function Index() {
 
         {/* Skip Option */}
         {!allCompleted && (
-          <div className="text-center mt-6">
+          <div className="text-center mt-6!">
             <Button
               // @ts-ignore
               variant="ghost"

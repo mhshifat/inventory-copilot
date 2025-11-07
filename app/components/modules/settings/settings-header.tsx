@@ -7,14 +7,14 @@ export default function SettingsHeader() {
 
     return (
         <div className="border-b border-border bg-card">
-            <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="max-w-5xl mx-auto! px-6! py-4!">
                 <Button
                     // @ts-ignore
                     variant="ghost"
                     onClick={() => navigate("/app/dashboard")}
-                    className="mb-4"
+                    className="mb-4!"
                 >
-                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                    <ArrowLeftIcon className="mr-2! h-4 w-4" />
                     Back to Dashboard
                 </Button>
                 <div className="flex items-center gap-3">
@@ -23,7 +23,7 @@ export default function SettingsHeader() {
                     </div>
                     <div>
                         <h1 className="text-3xl! font-bold! text-foreground">Settings</h1>
-                        <p className="text-muted-foreground mt-1">Manage your inventory preferences and notifications</p>
+                        <p className="text-muted-foreground mt-1!">Manage your inventory preferences and notifications</p>
                     </div>
                 </div>
             </div>

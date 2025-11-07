@@ -191,7 +191,7 @@ export default function Settings() {
       <SettingsHeader />
 
       {/* Settings Content */}
-      <div className="max-w-5xl mx-auto p-6 space-y-6">
+      <div className="max-w-5xl mx-auto! p-6! space-y-6">
         {isFirstTime ? (
           /* First-time Setup View */
           <>
@@ -345,7 +345,7 @@ export default function Settings() {
                   </div>
 
                   {form.watch("emailAlertsEnabled") && (
-                    <div className="space-y-2 pl-4 border-l-2 border-primary/20 flex flex-col">
+                    <div className="space-y-2 pl-4! border-l-2 border-primary/20 flex flex-col">
                       <Label htmlFor="alertEmail">Alert Email Address</Label>
                       <FormField
                         control={form.control}
@@ -453,8 +453,8 @@ export default function Settings() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isLoading} className="min-w-[150px]">
-                  {isLoading && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
-                  {!isLoading && <SaveIcon className="mr-2 h-4 w-4" />}
+                  {isLoading && <Loader2Icon className="mr-2! h-4 w-4 animate-spin" />}
+                  {!isLoading && <SaveIcon className="mr-2! h-4 w-4" />}
                   Save Changes
                 </Button>
               </div>

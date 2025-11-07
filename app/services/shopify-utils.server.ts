@@ -60,7 +60,7 @@ export class ShopifyUtils {
                 }
                 const currentBulkOperationStatus = currentBulkOperationResponse?.data?.currentBulkOperation?.status;
                 if (currentBulkOperationStatus && ["CANCELED", "FAILED", "EXPIRED", "CANCELING"].includes(currentBulkOperationStatus)) {
-                    throw new Error(`Bulk operation failed with status: ${currentBulkOperationStatus}`);
+                    throw new Error(`Bulk operation failed with status: ${currentBulkOperationStatus}, error code: ${currentBulkOperationResponse?.data?.currentBulkOperation?.errorCode}`);
                 } else if (currentBulkOperationStatus === "COMPLETED") {
                     return currentBulkOperationResponse?.data?.currentBulkOperation?.url || currentBulkOperationResponse?.data?.currentBulkOperation?.partialDataUrl || null;
                 } else if (currentBulkOperationStatus === "RUNNING") {

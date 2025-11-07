@@ -2,7 +2,7 @@
 CREATE TYPE "SyncLogStatus" AS ENUM ('QUEUED', 'RUNNING', 'COMPLETED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "SyncLogType" AS ENUM ('PRODUCTS_IMPORT');
+CREATE TYPE "SyncLogType" AS ENUM ('PRODUCTS_IMPORT', 'ORDERS_IMPORT');
 
 -- CreateTable
 CREATE TABLE "sessions" (
@@ -42,6 +42,7 @@ CREATE TABLE "products" (
     "title" TEXT,
     "handle" TEXT,
     "vendor" TEXT,
+    "collections" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "image" TEXT,
     "total_inventory" INTEGER DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -63,6 +64,31 @@ CREATE TABLE "variants" (
     "shop_id" INTEGER NOT NULL,
 
     CONSTRAINT "variants_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "orders" (
+    "id" SERIAL NOT NULL,
+    "shopify_id" BIGINT NOT NULL,
+    "total_units_sold" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "shop_id" INTEGER NOT NULL,
+
+    CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "line_items" (
+    "id" SERIAL NOT NULL,
+    "shopify_id" BIGINT NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "order_id" INTEGER NOT NULL,
+    "product_shopify_id" BIGINT NOT NULL,
+
+    CONSTRAINT "line_items_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -108,7 +134,19 @@ CREATE UNIQUE INDEX "shops_domain_key" ON "shops"("domain");
 CREATE UNIQUE INDEX "products_shopify_id_key" ON "products"("shopify_id");
 
 -- CreateIndex
+CREATE INDEX "products_vendor_idx" ON "products"("vendor");
+
+-- CreateIndex
+CREATE INDEX "products_collections_idx" ON "products" USING GIN ("collections");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "variants_shopify_id_key" ON "variants"("shopify_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "orders_shopify_id_key" ON "orders"("shopify_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "line_items_shopify_id_key" ON "line_items"("shopify_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "settings_shop_id_key" ON "settings"("shop_id");
@@ -121,6 +159,15 @@ ALTER TABLE "variants" ADD CONSTRAINT "variants_product_id_fkey" FOREIGN KEY ("p
 
 -- AddForeignKey
 ALTER TABLE "variants" ADD CONSTRAINT "variants_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "orders" ADD CONSTRAINT "orders_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "line_items" ADD CONSTRAINT "line_items_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "line_items" ADD CONSTRAINT "line_items_product_shopify_id_fkey" FOREIGN KEY ("product_shopify_id") REFERENCES "products"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "sync_logs" ADD CONSTRAINT "sync_logs_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;

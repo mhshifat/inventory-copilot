@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import useFetch from "@/hooks/use-fetch";
 import type { ApiResponse } from "@/lib/api-response";
+import { cn } from "@/lib/utils";
 import { useNavigate } from "@remix-run/react";
 import { DownloadIcon, PackageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -50,9 +51,9 @@ export default function ImportProducts() {
 
     if (error) return <PreviewError error={error} />;
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="min-h-screen bg-background flex items-center justify-center p-6!">
             <Card className="w-full max-w-md shadow-lg">
-                <CardContent className="pt-12 pb-12 text-center space-y-8">
+                <CardContent className="pt-12! pb-12! text-center space-y-8">
                     {/* Icon */}
                     <div className="flex justify-center">
                         <div className="relative">
@@ -83,13 +84,13 @@ export default function ImportProducts() {
                             disabled={eventData === null}
                             onClick={handleImport}
                             size="lg"
-                            className="w-full max-w-xs mx-auto"
+                            className={cn("w-full max-w-xs mx-auto!")}
                         >
-                            <DownloadIcon className="mr-2 h-5 w-5" />
-                            {eventData === null ? "Waiting for Shopify..." : "Import Products"}
+                            {eventData != null && <DownloadIcon className="mr-2! h-5 w-5" />}
+                            {eventData === null ? "Waiting for Shopify, do not leave the page..." : "Import Products"}
                         </Button>
                     ) : (
-                        <div className="space-y-3 max-w-xs mx-auto">
+                        <div className="space-y-3 max-w-xs mx-auto!">
                             <Progress value={progress} className="h-3" />
                             <p className="text-sm! font-medium! text-foreground">{progress}% Complete</p>
                         </div>
@@ -97,7 +98,7 @@ export default function ImportProducts() {
 
                     {/* Info text */}
                     {!isImporting && (
-                        <p className="text-xs! text-muted-foreground max-w-sm mx-auto">
+                        <p className="text-xs! text-muted-foreground max-w-sm mx-auto!">
                             This will sync your product inventory, stock levels, and sales data from your Shopify
                             store
                         </p>

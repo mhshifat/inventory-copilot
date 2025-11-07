@@ -4,6 +4,7 @@ import { BaseService } from "./base-srv.server";
 import { ShopifyUtils } from "./shopify-utils.server";
 import prisma from '../lib/db.server';
 import { SyncLogStatus, SyncLogType } from '@prisma/client';
+import { OrdersImportService } from './orders-import.server';
 
 
 export interface ImportProductsPayload {
@@ -22,6 +23,7 @@ export interface ShopifyProduct {
     vendor: string | null;
     totalInventory: number | null;
     variants: ShopifyProductVariant[];
+    collections?: string[];
 }
 
 export interface BulkOperationRunForProductsQueryResponse {
@@ -96,6 +98,15 @@ export class ProductsImportService extends BaseService {
                                                     }
                                                 }
                                                 vendor
+                                                collections {
+                                                    edges {
+                                                        node {
+                                                            id
+                                                            title
+                                                            __typename
+                                                        }
+                                                    }
+                                                }
                                                 variants {
                                                     edges {
                                                         node {
@@ -189,6 +200,17 @@ export class ProductsImportService extends BaseService {
                                     }
                                 ]
                             });
+                        } else if (typeof chunk.__parentId === "string" && chunk.__parentId?.startsWith("gid://shopify/Product/") && Object.hasOwnProperty.call(chunk, "__typename") && (chunk as unknown as { __typename: string }).__typename === "Collection") {
+                            // Collection chunk
+                            const productId = chunk.__parentId?.replace("gid://shopify/Product/", "");
+                            products.set(productId, {
+                                ...(products.get(productId) || {}),
+                                id: productId,
+                                collections: [
+                                    ...((products.get(productId))?.collections || []),
+                                    (chunk as unknown as { title: string }).title
+                                ]
+                            });
                         }
                     } else if ("id" in chunk) {
                         // Product chunk
@@ -209,7 +231,15 @@ export class ProductsImportService extends BaseService {
             });
             products.clear();
             global.gc && global.gc();
-            await this.updateProgress(`Step 4: Imported products into database for shop ID ${this.shopId}`, 100);
+            await this.updateProgress(`Step 4: Imported products into database for shop ID ${this.shopId}`, 80);
+            const orderService = new OrdersImportService(
+                this.shopId,
+                this.syncLogId,
+                this.shop,
+                this.accessToken
+            );
+            await orderService.importOrders({});
+            await this.updateProgress(`Step 5: Imported orders into database for shop ID ${this.shopId}`, 100);
             await prisma.syncLog.update({
                 where: { id: this.syncLogId },
                 data: {
@@ -255,6 +285,7 @@ export class ProductsImportService extends BaseService {
                 product.title,
                 product.handle,
                 product.vendor,
+                product.collections,
                 product.image,
                 product.totalInventory,
                 shopId,
@@ -264,8 +295,8 @@ export class ProductsImportService extends BaseService {
 
             const placeholders = batch
                 .map((_, i) => {
-                    const base = i * 9;
-                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
+                    const base = i * 10;
+                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10})`;
                 })
                 .join(", ");
 
@@ -274,7 +305,7 @@ export class ProductsImportService extends BaseService {
                     await tx.$executeRawUnsafe(
                         `
                             INSERT INTO "products" (
-                                "shopify_id", title, handle, vendor, image, total_inventory, shop_id, created_at, updated_at
+                                "shopify_id", title, handle, vendor, collections, image, total_inventory, shop_id, created_at, updated_at
                             ) 
                             VALUES ${placeholders}
                             ON CONFLICT (shopify_id)
