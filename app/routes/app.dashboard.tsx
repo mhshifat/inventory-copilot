@@ -95,11 +95,16 @@ export const loader = async (args: LoaderFunctionArgs) => {
                     WITH sales as (
                         SELECT
                             p.*,
-                            COALESCE(SUM(li.quantity), 0) as total_units_sold
+                            COALESCE(SUM(li.quantity), 0) as total_units_sold,
+                            MAX(s.lead_time) AS supplier_lead_time,
+                            MAX(s.min_order_qty) AS supplier_min_order_qty
                         FROM products as p
 
                         LEFT JOIN line_items as li
                         ON p.shopify_id = li.product_shopify_id
+
+                        LEFT JOIN suppliers as s
+                        ON p.supplier_id = s.id
 
                         GROUP BY p.id
                     )
@@ -117,7 +122,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                             THEN CEIL(total_inventory::numeric / avg_daily_sales)
                             ELSE null
                     END as days_until_out,
-                    (COALESCE(avg_daily_sales, 0) * ${leadTimeDays}) as suggested_reorder
+                    (COALESCE(avg_daily_sales, 0) * (CASE WHEN supplier_lead_time IS NOT NULL THEN supplier_lead_time ELSE ${leadTimeDays} END)) as suggested_reorder
                 FROM avgSales
             )
 
@@ -268,6 +273,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         avg_daily_sales: number,
         days_until_out: number | null,
         suggested_reorder: number,
+        supplier_min_order_qty: number,
         stock_status: "STOCK_OUT" | "LOW_STOCK" | "IN_STOCK",
     }): DashboardProductsTableData => {
         return {
@@ -281,6 +287,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
             daysUntilOut: product?.days_until_out || Infinity,
             suggestedReorder: product?.suggested_reorder ?? 0,
             status: product.stock_status,
+            supplierMinOrderQty: product.supplier_min_order_qty || null,
         }
     }
 

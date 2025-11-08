@@ -32,7 +32,7 @@ const getStatusTitle = (status: DashboardProductsTableData["status"]) => {
     }
 };
 
-export interface DashboardProductsTableData{
+export interface DashboardProductsTableData {
     id: number;
     title: string;
     handle: string;
@@ -43,6 +43,7 @@ export interface DashboardProductsTableData{
     daysUntilOut: number;
     suggestedReorder: number;
     status: "LOW_STOCK" | "STOCK_OUT" | "IN_STOCK";
+    supplierMinOrderQty: number | null;
 }
 
 interface DashboardProductsTableProps {
@@ -182,7 +183,23 @@ export default function DashboardProductsTable({ data, pagination, onPageChange,
                                             )}
                                         </span>
                                     </TableCell>
-                                    <TableCell>{product.suggestedReorder}</TableCell>
+                                    <TableCell>
+                                        {(product?.supplierMinOrderQty || 0) > 0 && product.suggestedReorder < (product?.supplierMinOrderQty || 0)
+                                            ? <span className="flex items-center gap-1">
+                                                <span className="text-red-500 line-through">{product.suggestedReorder}</span>
+                                                <span>{product.supplierMinOrderQty}</span>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                        <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="max-w-xs">
+                                                        <p>The minimum order quantity set by the supplier.</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </span>
+                                            : product.suggestedReorder
+                                        }
+                                    </TableCell>
                                     <TableCell>
                                         <Badge className={getStatusColor(product.status)}>{getStatusTitle(product.status)}</Badge>
                                     </TableCell>
@@ -196,7 +213,7 @@ export default function DashboardProductsTable({ data, pagination, onPageChange,
                 <div className="flex items-center justify-between px-6! py-4! border-t border-border">
                     <div className="text-sm! text-muted-foreground">
                         Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                            {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{" "}
+                        {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{" "}
                         products
                     </div>
                     <div className="flex items-center gap-2">
