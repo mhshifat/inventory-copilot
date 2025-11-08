@@ -12,7 +12,14 @@ export default function useFetch(url: string) {
                     throw new Error(response.statusText || "Network response was not ok");
                 }
                 return response.json();
-            });
+            })
+            .then((data) => {
+                if (!data?.success) {
+                    throw new Error(data?.message || "API response indicated failure");
+                }
+
+                return data;
+            })
     }, [url])
 
     return { error, fetch: callApi };

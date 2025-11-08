@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "@remix-run/react"
 import { useCallback, useMemo } from "react"
 
-export default function useFilter() {
+export default function useFilter(options?: { path: string }) {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -31,11 +31,11 @@ export default function useFilter() {
             }
 
             navigate({
-                pathname: location.pathname,
+                pathname: options?.path || location.pathname,
                 search: searchParams.toString(),
             });
         },
-        [location.pathname, location.search, navigate]
+        [location.pathname, location.search, navigate, options?.path]
     );
     const filterValues = useMemo(() => {
         const searchParams = new URLSearchParams(location.search);

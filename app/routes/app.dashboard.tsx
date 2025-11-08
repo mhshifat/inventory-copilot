@@ -63,6 +63,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const stockStatus = searchParams.get("stockStatus");
     const vendor = searchParams.get("vendor");
     const collection = searchParams.get("collection");
+    const supplier = searchParams.get("supplier");
 
     const forecastPeriod = shop.settings?.forecast_period || 30; // days
     const leadTimeDays = shop.settings?.default_lead_time || 14; // days
@@ -74,6 +75,17 @@ export const loader = async (args: LoaderFunctionArgs) => {
             ${searchQuery ? `AND title ILIKE '%${decodeURIComponent(searchQuery).replace(/'/g, "''")}%'` : ''}
             ${vendor ? `AND vendor = '${decodeURIComponent(vendor)}'` : ''}
             ${collection ? `AND '${decodeURIComponent(collection)}' = ANY (collections)` : ''}
+            ${supplier ? `AND supplier_id = ${parseInt(supplier, 10)}` : ''}
+    `;
+
+    const whereQuerySummary = `
+        WHERE
+            shop_id = ${shop.id}
+    `;
+
+    const whereQueryAiForecast = `
+        WHERE
+            shop_id = ${shop.id}
     `;
 
     const querySelect = `
@@ -175,7 +187,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                     WITH products_with_sales AS (
                         ${querySelect}
         
-                        ${whereQuery}
+                        ${whereQuerySummary}
                     )
         
                     SELECT 
@@ -209,7 +221,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                 WITH products_with_sales_count AS (
                     ${querySelect}
 
-                    ${whereQuery}
+                    ${whereQueryAiForecast}
                 )
 
                 SELECT
@@ -272,7 +284,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         }
     }
 
-    if ((products as []).length === 0) {
+    if ((products as []).length === 0 && !searchParams.size) {
         return redirect('/app');
     }
 
@@ -392,7 +404,7 @@ export default function Dashboard() {
                         <div className="lg:col-span-1" data-tour-id="ai-forecast">
                             <DashboardAiForecastWidget
                                 aiForecastData={aiForecast}
-                                onViewAll={() => navigate("/reports")}
+                                onViewAll={() => navigate("/app/reports")}
                             />
                         </div>
                     </div>

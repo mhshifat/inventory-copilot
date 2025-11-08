@@ -18,7 +18,7 @@ export default function Help() {
                             // @ts-ignore
                             variant="ghost"
                             size="icon"
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => navigate("/app/dashboard")}
                             className="hover:bg-accent"
                         >
                             <ChevronLeftIcon className="h-5 w-5" />

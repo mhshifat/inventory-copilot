@@ -11,7 +11,7 @@ export class ApiResponse<T> {
     }) {
         this.data = args.data;
         this.error = args.error;
-        this.success = args.error === null;
+        this.success = !args.error;
         this.message = args.message;
     }
 
