@@ -1,4 +1,3 @@
-import { supplierSchema } from "@/components/modules/suppliers/suppliers-form-dialog";
 import { ApiResponse } from "@/lib/api-response";
 import prisma from "@/lib/db.server";
 import { authenticate, handleError } from "@/shopify.server";
@@ -24,56 +23,42 @@ export const action = async (args: ActionFunctionArgs) => {
             throw new Error(`Access token missing for shop: ${session.shop}`);
         }
 
-        const supplierId = args.params.supplierId;
+        const productId = args.params.productId;
 
-        if (!supplierId) {
+        if (!productId) {
             throw new Error("Supplier ID is required");
         }
 
 
         switch (args.request.method) {
-            case "DELETE": {
-                await prisma.supplier.delete({
-                    where: {
-                        id: +supplierId
-                    }
-                });
-
-                return new ApiResponse({
-                    data: null,
-                    message: "Supplier deleted successfully"
-                });
-            }
-            case "PUT": {
+            case "PATCH": {
                 const payload = await args.request.json();
                 
                 try {
-                    await supplierSchema.partial().safeParseAsync(payload);
+                    await z.object({
+                        supplierId: z.string().optional(),
+                    }).partial().safeParseAsync(payload);
                 } catch (err) {
                     const errors = (err as z.ZodError).issues.map((e) => e.message).join(", ");
                     throw new Error(`Invalid supplier data: ${errors}`);
                 }
 
-                await prisma.supplier.update({
+                await prisma.product.update({
                     where: {
-                        id: +supplierId,
+                        id: +productId,
                         shop_id: shop.id,
                     },
                     data: {
-                        name: payload.name,
-                        contact_email: payload.contactEmail,
-                        lead_time: payload.leadTime,
-                        min_order_qty: payload.minOrderQty,
-                        notes: payload.notes,
+                        supplier_id: +payload.supplierId
                     },
                     select: {
-                        id: true
+                        id: true,
                     }
                 });
-                
+
                 return new ApiResponse({
                     data: null,
-                    message: "Supplier updated successfully",
+                    message: "Product updated successfully",
                 });
             }
             default:

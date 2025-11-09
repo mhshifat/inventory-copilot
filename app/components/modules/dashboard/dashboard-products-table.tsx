@@ -139,7 +139,7 @@ export default function DashboardProductsTable({ data, pagination, onPageChange,
                                 <TableRow
                                     key={product.id}
                                     className="hover:bg-muted/30 transition-colors cursor-pointer"
-                                    onClick={() => navigate(`/product/${product.id}`)}
+                                    onClick={() => navigate(`/app/products/${product.id}`)}
                                 >
                                     <TableCell>
                                         <div className="flex items-center gap-3">
@@ -184,7 +184,7 @@ export default function DashboardProductsTable({ data, pagination, onPageChange,
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        {(product?.supplierMinOrderQty || 0) > 0 && product.suggestedReorder < (product?.supplierMinOrderQty || 0)
+                                        {(product?.supplierMinOrderQty || 0) > 0 && product.suggestedReorder > 0 && product.suggestedReorder < (product?.supplierMinOrderQty || 0)
                                             ? <span className="flex items-center gap-1">
                                                 <span className="text-red-500 line-through">{product.suggestedReorder}</span>
                                                 <span>{product.supplierMinOrderQty}</span>

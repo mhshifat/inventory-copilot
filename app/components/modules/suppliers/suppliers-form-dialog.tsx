@@ -29,7 +29,7 @@ export type SuppliersFormRef = {
 
 interface SuppliersFormDialogProps {
     open?: boolean;
-    onOpenChange: (open: boolean) => void;
+    onOpenChange?: (open: boolean) => void;
     defaultValues?: SupplierFormData & { id: number };
 }
 
@@ -58,7 +58,7 @@ function SuppliersFormDialog({ open, onOpenChange, defaultValues }: SuppliersFor
             });
             form.reset();
             setIsAddModalOpen(false);
-            onOpenChange(false);
+            onOpenChange?.(false);
             toast.success(defaultValues ? "Supplier updated successfully" : "Supplier added successfully");
             await revalidator.revalidate();
         } catch (err) {
@@ -77,7 +77,7 @@ function SuppliersFormDialog({ open, onOpenChange, defaultValues }: SuppliersFor
     return (
         <Dialog open={isAddModalOpen} onOpenChange={(value) => {
             setIsAddModalOpen(value);
-            onOpenChange(value);
+            onOpenChange?.(value);
         }}>
             {open === undefined && (
                 <DialogTrigger asChild>
@@ -209,7 +209,7 @@ function SuppliersFormDialog({ open, onOpenChange, defaultValues }: SuppliersFor
                                 // @ts-ignore
                                 variant="outline" onClick={() => {
                                     setIsAddModalOpen(false);
-                                    onOpenChange(false);
+                                    onOpenChange?.(false);
                                 }} disabled={loading} type="button">
                                 Cancel
                             </Button>
