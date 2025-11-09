@@ -18,6 +18,7 @@ export interface ShopifyLineItem {
 
 export interface ShopifyOrder {
     id: string;
+    createdAt: string;
     subtotalLineItemsQuantity: number;
     lineItems: ShopifyLineItem[]
 }
@@ -84,6 +85,7 @@ export class OrdersImportService extends BaseService {
                                         edges {
                                             node {
                                                 id
+                                                createdAt
                                                 subtotalLineItemsQuantity
                                                 lineItems {
                                                     edges {
@@ -180,6 +182,7 @@ export class OrdersImportService extends BaseService {
                         orders.set(orderId, {
                             ...(orders.get(orderId) || {}),
                             id: orderId,
+                            createdAt: (chunk as unknown as { createdAt: string }).createdAt,
                             subtotalLineItemsQuantity: (chunk as unknown as { subtotalLineItemsQuantity: number }).subtotalLineItemsQuantity,
                         });
                     }
@@ -234,6 +237,7 @@ export class OrdersImportService extends BaseService {
             const values = batch.map((order) => [
                 BigInt(order.id),
                 order.subtotalLineItemsQuantity,
+                new Date(order.createdAt),
                 now,
                 now,
                 shopId
@@ -241,8 +245,8 @@ export class OrdersImportService extends BaseService {
 
             const placeholders = batch
                 .map((_, i) => {
-                    const base = i * 5;
-                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`;
+                    const base = i * 6;
+                    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`;
                 })
                 .join(", ");
 
@@ -251,12 +255,13 @@ export class OrdersImportService extends BaseService {
                     await tx.$executeRawUnsafe(
                         `
                             INSERT INTO "orders" (
-                                "shopify_id", total_units_sold, created_at, updated_at, shop_id
+                                "shopify_id", total_units_sold, shopify_created_at, created_at, updated_at, shop_id
                             ) 
                             VALUES ${placeholders}
                             ON CONFLICT (shopify_id)
                             DO UPDATE SET
                                 total_units_sold = EXCLUDED.total_units_sold,
+                                shopify_created_at = EXCLUDED.shopify_created_at,
                                 shop_id = EXCLUDED.shop_id,
                                 created_at = EXCLUDED.created_at,
                                 updated_at = EXCLUDED.updated_at;
@@ -281,15 +286,16 @@ export class OrdersImportService extends BaseService {
                     );
 
                     let lineItemsRows = [];
-                    for (const p of batch) {
-                        const orderId = orderIdMap.get(p.id.toString());
-                        if (!orderId || !Array.isArray(p.lineItems)) continue;
+                    for (const order of batch) {
+                        const orderId = orderIdMap.get(order.id.toString());
+                        if (!orderId || !Array.isArray(order.lineItems)) continue;
 
-                        for (const li of p.lineItems) {
+                        for (const li of order.lineItems) {
                             lineItemsRows.push([
                                 BigInt(li.id),
                                 BigInt(li.productId),
                                 li.quantity,
+                                new Date(order.createdAt),
                                 now,
                                 now,
                                 orderId,
@@ -300,8 +306,8 @@ export class OrdersImportService extends BaseService {
                     if (lineItemsRows.length > 0) {
                         const lineItemPlaceholders = lineItemsRows
                             .map((_, i) => {
-                                const base = i * 6;
-                                return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`;
+                                const base = i * 7;
+                                return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7})`;
                             })
                             .join(", ");
                         const lineItemValues = lineItemsRows.flat();
@@ -309,13 +315,14 @@ export class OrdersImportService extends BaseService {
                         await tx.$executeRawUnsafe(
                             `
                                 INSERT INTO "line_items" (
-                                    "shopify_id", "product_shopify_id", quantity, created_at, updated_at, order_id
+                                    "shopify_id", "product_shopify_id", quantity, shopify_created_at, created_at, updated_at, order_id
                                 )
                                 VALUES ${lineItemPlaceholders}
                                 ON CONFLICT (shopify_id)
                                 DO UPDATE SET
                                     product_shopify_id = EXCLUDED.product_shopify_id,
                                     quantity = EXCLUDED.quantity,
+                                    shopify_created_at = EXCLUDED.shopify_created_at,
                                     created_at = EXCLUDED.created_at,
                                     updated_at = EXCLUDED.updated_at,
                                     order_id = EXCLUDED.order_id;

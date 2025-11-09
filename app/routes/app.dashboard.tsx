@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { redirect, useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
+import { useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
 import { toast } from "sonner";
 import { authenticate, handleError } from '@/shopify.server';
 import prisma from '@/lib/db.server';
@@ -67,6 +67,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
     const forecastPeriod = shop.settings?.forecast_period || 30; // days
     const leadTimeDays = shop.settings?.default_lead_time || 14; // days
+    const lowStockThreshold = shop.settings?.low_stock_threshold || 0; // units
 
     const whereQuery = `
         WHERE
@@ -133,7 +134,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                         THEN 'IN_STOCK'
                     WHEN (COALESCE(days_until_out, 0)) = 0 
                         THEN 'STOCK_OUT'
-                    WHEN (COALESCE(days_until_out, 0)) <= 7 
+                    WHEN (COALESCE(days_until_out, 0)) <= ${lowStockThreshold} 
                         THEN 'LOW_STOCK'
                     ELSE 
                         'IN_STOCK'
@@ -289,10 +290,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
             status: product.stock_status,
             supplierMinOrderQty: product.supplier_min_order_qty || null,
         }
-    }
-
-    if ((products as []).length === 0 && !searchParams.size) {
-        return redirect('/app');
     }
 
     const transformForecastProduct = (product: {

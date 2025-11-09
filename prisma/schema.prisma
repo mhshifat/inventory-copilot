@@ -115,36 +115,38 @@ model Variant {
 }
 
 model Order {
-  id                Int         @id @default(autoincrement())
+  id                    Int         @id @default(autoincrement())
 
-  shopify_id        BigInt      @unique
-  total_units_sold  Int
+  shopify_id            BigInt      @unique
+  total_units_sold      Int
+  shopify_created_at    DateTime
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @updatedAt
 
-  line_items       LineItem[]
+  line_items            LineItem[]
 
-  shop_id           Int
-  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id               Int
+  shop                  Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("orders")
 }
 
 model LineItem {
-  id                Int         @id @default(autoincrement())
+  id                    Int         @id @default(autoincrement())
 
-  shopify_id        BigInt      @unique
-  quantity          Int
+  shopify_id            BigInt      @unique
+  quantity              Int
+  shopify_created_at    DateTime
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @updatedAt
 
-  order_id           Int
-  order              Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_id              Int
+  order                 Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
-  product_shopify_id BigInt
-  product            Product     @relation(fields: [product_shopify_id], references: [shopify_id], onDelete: Cascade)
+  product_shopify_id    BigInt
+  product               Product     @relation(fields: [product_shopify_id], references: [shopify_id], onDelete: Cascade)
 
   @@map("line_items")
 }

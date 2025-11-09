@@ -4,6 +4,12 @@ CREATE TYPE "SyncLogStatus" AS ENUM ('QUEUED', 'RUNNING', 'COMPLETED', 'FAILED')
 -- CreateEnum
 CREATE TYPE "SyncLogType" AS ENUM ('PRODUCTS_IMPORT', 'ORDERS_IMPORT');
 
+-- CreateEnum
+CREATE TYPE "AlertSeverity" AS ENUM ('CRITICAL', 'WARNING', 'RESTOCKED');
+
+-- CreateEnum
+CREATE TYPE "AlertStatus" AS ENUM ('UNREAD', 'RESOLVED');
+
 -- CreateTable
 CREATE TABLE "sessions" (
     "id" TEXT NOT NULL,
@@ -48,6 +54,7 @@ CREATE TABLE "products" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "shop_id" INTEGER NOT NULL,
+    "supplier_id" INTEGER,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -71,6 +78,7 @@ CREATE TABLE "orders" (
     "id" SERIAL NOT NULL,
     "shopify_id" BIGINT NOT NULL,
     "total_units_sold" INTEGER NOT NULL,
+    "shopify_created_at" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "shop_id" INTEGER NOT NULL,
@@ -83,6 +91,7 @@ CREATE TABLE "line_items" (
     "id" SERIAL NOT NULL,
     "shopify_id" BIGINT NOT NULL,
     "quantity" INTEGER NOT NULL,
+    "shopify_created_at" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "order_id" INTEGER NOT NULL,
@@ -121,6 +130,37 @@ CREATE TABLE "settings" (
     CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "alerts" (
+    "id" SERIAL NOT NULL,
+    "productName" TEXT NOT NULL,
+    "productImage" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "severity" "AlertSeverity" NOT NULL,
+    "status" "AlertStatus" NOT NULL DEFAULT 'UNREAD',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "product_id" INTEGER NOT NULL,
+    "shop_id" INTEGER NOT NULL,
+
+    CONSTRAINT "alerts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "suppliers" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "contact_email" TEXT NOT NULL,
+    "lead_time" INTEGER NOT NULL,
+    "min_order_qty" INTEGER NOT NULL,
+    "notes" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "shop_id" INTEGER NOT NULL,
+
+    CONSTRAINT "suppliers_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "sessions_shop_idx" ON "sessions"("shop");
 
@@ -155,6 +195,9 @@ CREATE UNIQUE INDEX "settings_shop_id_key" ON "settings"("shop_id");
 ALTER TABLE "products" ADD CONSTRAINT "products_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "variants" ADD CONSTRAINT "variants_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -174,3 +217,12 @@ ALTER TABLE "sync_logs" ADD CONSTRAINT "sync_logs_shop_id_fkey" FOREIGN KEY ("sh
 
 -- AddForeignKey
 ALTER TABLE "settings" ADD CONSTRAINT "settings_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "alerts" ADD CONSTRAINT "alerts_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "alerts" ADD CONSTRAINT "alerts_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "suppliers" ADD CONSTRAINT "suppliers_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
