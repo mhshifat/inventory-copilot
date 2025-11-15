@@ -81,7 +81,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
         const transformAlert = (alert: AlertFromDB): AlertCardDetails => ({
             id: alert.id,
-            productId: String(alert.product_id),
+            productId: String(alert.shopify_product_id),
             productName: alert.productName,
             productImage: alert.productImage,
             message: alert.message,
