@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/lib/api-response";
 import prisma from "@/lib/db.server";
+import rateLimit from "@/lib/rate-limit";
 import { authenticate, handleError } from "@/shopify.server";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import z from "zod";
@@ -7,6 +8,9 @@ import z from "zod";
 export const action = async (args: ActionFunctionArgs) => {
     try {
         const { session } = await authenticate.admin(args.request);
+
+        rateLimit(`${session.shop}-update-product`, 10, 60_000);
+
         const shop = await prisma.shop.findUnique({
             where: {
                 domain: session.shop
