@@ -39,7 +39,12 @@ export const loader = async (args: LoaderFunctionArgs) => {
   }
 
   try {
-    const { session } = await authenticate.admin(args.request);
+    const { session, billing, redirect } = await authenticate.admin(args.request);
+
+    const existingBilling = await billing.check({});
+      const currentBilling = existingBilling.appSubscriptions?.[0];
+      if (currentBilling?.status !== "ACTIVE") return redirect("/app/pricing", 303);
+
     const shop = await prisma.shop.findUnique({
       where: {
         domain: session.shop

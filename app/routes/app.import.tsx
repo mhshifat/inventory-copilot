@@ -6,10 +6,22 @@ import { Progress } from "@/components/ui/progress";
 import useFetch from "@/hooks/use-fetch";
 import type { ApiResponse } from "@/lib/api-response";
 import { cn } from "@/lib/utils";
+import { authenticate } from "@/shopify.server";
+import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import { DownloadIcon, PackageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+    const { billing, redirect } = await authenticate.admin(request);
+    
+    const existingBilling = await billing.check({});
+    const currentBilling = existingBilling.appSubscriptions?.[0];
+    if (currentBilling?.status !== "ACTIVE") return redirect("/app/pricing", 303);
+
+    return {};
+}
 
 export default function ImportProducts() {
     const navigate = useNavigate();

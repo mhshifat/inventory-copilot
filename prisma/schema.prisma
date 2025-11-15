@@ -35,24 +35,26 @@ enum SyncLogType {
   ORDER_PARTIAL_FULFILL
   ORDERS_UPDATE
   LOW_STOCK_ALERT
+  BILLING_PLAN_CHANGE
+  BILLING_CANCEL
 }
 
 model Session {
-  id                  String    @id
-  shop                String
-  state               String
-  is_online           Boolean   @default(false)
-  scope               String?
-  expires             DateTime?
-  access_token        String
-  user_id             BigInt?
-  first_name          String?
-  last_name           String?
-  email               String?
-  account_owner       Boolean   @default(false)
-  locale              String?
-  collaborator        Boolean?  @default(false)
-  email_verified      Boolean?  @default(false)
+  id             String    @id
+  shop           String
+  state          String
+  is_online      Boolean   @default(false)
+  scope          String?
+  expires        DateTime?
+  access_token   String
+  user_id        BigInt?
+  first_name     String?
+  last_name      String?
+  email          String?
+  account_owner  Boolean   @default(false)
+  locale         String?
+  collaborator   Boolean?  @default(false)
+  email_verified Boolean?  @default(false)
 
   @@index([shop])
   @@index([access_token])
@@ -60,47 +62,49 @@ model Session {
 }
 
 model Shop {
-  id                Int         @id @default(autoincrement())
-  domain            String      @unique
+  id     Int    @id @default(autoincrement())
+  domain String @unique
+  total_products Int    @default(0)
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  products          Product[]
-  variants          Variant[]
-  orders            Order[]
-  sync_logs         SyncLog[]
-  alerts            Alert[]
-  suppliers         Supplier[]
+  products  Product[]
+  variants  Variant[]
+  orders    Order[]
+  sync_logs SyncLog[]
+  alerts    Alert[]
+  suppliers Supplier[]
 
-  settings          Setting?
+  settings Setting?
+  billing  Billing?
 
   @@map("shops")
 }
 
 model Product {
-  id                Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  shopify_id        BigInt      @unique
-  title             String?
-  handle            String?
-  vendor            String?
-  collections       String[]    @default([])
-  image             String?
-  total_inventory   Int?        @default(0)
+  shopify_id      BigInt   @unique
+  title           String?
+  handle          String?
+  vendor          String?
+  collections     String[] @default([])
+  image           String?
+  total_inventory Int?     @default(0)
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  shop_id           Int
-  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
-  variants          Variant[]
-  line_items        LineItem[]
-  alerts            Alert[]
+  variants   Variant[]
+  line_items LineItem[]
+  alerts     Alert[]
 
-  supplier_id       Int?
-  supplier          Supplier?   @relation(fields: [supplier_id], references: [id], onDelete: SetNull)
+  supplier_id Int?
+  supplier    Supplier? @relation(fields: [supplier_id], references: [id], onDelete: SetNull)
 
   @@index([vendor])
   @@index([collections], type: Gin)
@@ -108,93 +112,93 @@ model Product {
 }
 
 model Variant {
-  id                Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  shopify_id        BigInt      @unique
-  title             String?
-  sku               String?
+  shopify_id BigInt  @unique
+  title      String?
+  sku        String?
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  product_id        Int
-  product           Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
-  shop_id           Int
-  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("variants")
 }
 
 model Order {
-  id                    Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  shopify_id            BigInt      @unique
-  total_units_sold      Int
-  shopify_created_at    DateTime
+  shopify_id         BigInt   @unique
+  total_units_sold   Int
+  shopify_created_at DateTime
 
-  created_at            DateTime    @default(now())
-  updated_at            DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  line_items            LineItem[]
+  line_items LineItem[]
 
-  shop_id               Int
-  shop                  Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("orders")
 }
 
 model LineItem {
-  id                    Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  shopify_id            BigInt      @unique
-  quantity              Int
-  shopify_created_at    DateTime
+  shopify_id         BigInt   @unique
+  quantity           Int
+  shopify_created_at DateTime
 
-  created_at            DateTime    @default(now())
-  updated_at            DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  order_id              Int
-  order                 Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_id Int
+  order    Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
-  product_shopify_id    BigInt
-  product               Product     @relation(fields: [product_shopify_id], references: [shopify_id], onDelete: Cascade)
+  product_shopify_id BigInt
+  product            Product @relation(fields: [product_shopify_id], references: [shopify_id], onDelete: Cascade)
 
   @@map("line_items")
 }
 
 model SyncLog {
-  id                Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  status            SyncLogStatus
-  type              SyncLogType
-  message           String?
+  status  SyncLogStatus
+  type    SyncLogType
+  message String?
 
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  shop_id           Int
-  shop              Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("sync_logs")
 }
 
 model Setting {
-  id                        Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  forecast_period           String
-  default_lead_time         String
-  low_stock_threshold       String
-  email_alerts_enabled      Boolean
-  alert_email               String?
-  in_app_alerts_enabled     Boolean     @default(true)
-  units                     String?
+  forecast_period       String
+  default_lead_time     String
+  low_stock_threshold   String
+  email_alerts_enabled  Boolean
+  alert_email           String?
+  in_app_alerts_enabled Boolean @default(true)
+  units                 String?
 
-  created_at                DateTime    @default(now())
-  updated_at                DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  shop_id                   Int         @unique
-  shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int  @unique
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("settings")
 }
@@ -211,43 +215,128 @@ enum AlertStatus {
 }
 
 model Alert {
-  id                        Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  productName               String
-  productImage              String
-  message                   String
-  severity                  AlertSeverity
-  status                    AlertStatus @default(UNREAD)
+  productName  String
+  productImage String
+  message      String
+  severity     AlertSeverity
+  status       AlertStatus   @default(UNREAD)
 
-  created_at                DateTime    @default(now())
-  updated_at                DateTime    @updatedAt
-  alert_sent_at             DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  alert_sent_at DateTime?
 
-  shopify_product_id        BigInt
-  product                   Product     @relation(fields: [shopify_product_id], references: [shopify_id], onDelete: Cascade)
+  shopify_product_id BigInt
+  product            Product @relation(fields: [shopify_product_id], references: [shopify_id], onDelete: Cascade)
 
-  shop_id                   Int         
-  shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("alerts")
 }
 
 model Supplier {
-  id                        Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  name                      String
-  contact_email             String
-  lead_time                 Int
-  min_order_qty             Int
-  notes                     String?
+  name          String
+  contact_email String
+  lead_time     Int
+  min_order_qty Int
+  notes         String?
 
-  created_at                DateTime    @default(now())
-  updated_at                DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  products                  Product[]
+  products Product[]
 
-  shop_id                   Int         
-  shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  shop_id Int
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("suppliers")
+}
+
+enum PlanStatus {
+  DOWNGRADE
+  UPGRADE
+  CANCELLED
+  EXPIRED
+  PENDING
+  ACTIVE
+  DECLINED
+  FROZEN
+}
+
+enum PlanCycle {
+  MONTHLY
+  ANNUAL
+}
+
+enum BillingCouponType {
+  PERCENTAGE_DISCOUNT
+  FIXED_AMOUNT_DISCOUNT
+  FIXED_PRICE
+}
+
+enum PlanType {
+  Starter
+  Pro
+  Business
+  Enterprise
+}
+
+model Billing {
+  id                    Int       @id @default(autoincrement())
+  current_plan_id       String // to store the current plan id for the shop
+  current_plan_name     PlanType // to store the current plan name for the shop
+  current_billing_start DateTime // to store the current billing end date for the shop
+  current_billing_end   DateTime // to store the current billing end date for the shop
+  current_product_limit Int // to store the current billing end date for the shop
+  current_plan_price    Decimal   @db.Decimal(10, 2)
+  current_plan_cycle    PlanCycle
+
+  remaining_credit Int?      @default(0)
+  trial_taken      Boolean   @default(false) // to indicate if the shop has taken a trial
+  trial_end        DateTime? // to store the trial end date for the shop
+
+  previous_plan_id       String? // to store the previous plan id for the shop
+  previous_plan_name     PlanType? // to store the previous plan name for the shop
+  previous_billing_start DateTime? // to store the previous billing end date for the shop
+  previous_billing_end   DateTime? // to store the previous billing end date for the shop
+  previous_product_limit Int? // to store the previous product limit for the shop
+  previous_plan_price    Decimal   @db.Decimal(10, 2)
+  previous_plan_cycle    PlanCycle
+
+  cancelled_subscription_at DateTime? // to store the date when the subscription was cancelled
+  status                    PlanStatus @default(ACTIVE) // to handle the change plan status for the shop
+  created_at                DateTime   @default(now())
+  updated_at                DateTime   @updatedAt
+
+  coupon_applied                  Boolean            @default(false)
+  coupon_code                     String?
+  coupon_plan_name                PlanType?
+  coupon_value                    Decimal?           @db.Decimal(10, 2)
+  coupon_value_type               BillingCouponType?
+  coupon_duration_limit_intervals Int?
+  coupon_product_limit            Int?
+  coupon_plan_cycle               PlanCycle?
+
+  shop_id Int  @unique
+  shop    Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("billings")
+}
+
+model BillingCoupon {
+  id              Int       @id @default(autoincrement())
+  code            String    @unique
+  plans           String // json array of plans, an object with planName, price, discount type etc
+  expires_at      DateTime?
+  allowed_domains String?
+  max_usage_limit Int?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@index([code])
+  @@map("billing_coupons")
 }

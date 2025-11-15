@@ -35,7 +35,7 @@ export const action = async (args: ActionFunctionArgs) => {
 
         await prisma.alert.update({
             where: {
-                id: payload.id
+                id: Number(payload.id),
             },
             data: {
                 status: AlertStatus.RESOLVED
@@ -53,7 +53,7 @@ export const action = async (args: ActionFunctionArgs) => {
         handleError(err);
         return new ApiResponse({
             data: null,
-            message: "Error marking alert as read",
+            error: "Error marking alert as read",
         });
     }
 }

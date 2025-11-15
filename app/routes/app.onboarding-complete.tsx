@@ -1,9 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { authenticate } from "@/shopify.server";
+import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import confetti from "canvas-confetti";
 import { BarChart3Icon, BellIcon, CheckCircle2Icon, TrendingUpIcon } from "lucide-react";
 import { useEffect } from "react";
+
+export const loader = async (args: LoaderFunctionArgs) => {
+    const { billing, redirect } = await authenticate.admin(args.request);
+
+    const existingBilling = await billing.check({});
+    const currentBilling = existingBilling.appSubscriptions?.[0];
+    if (currentBilling?.status !== "ACTIVE") return redirect("/app/pricing", 303);
+
+    return {};
+}
 
 export default function OnboardingComplete() {
     const navigate = useNavigate();

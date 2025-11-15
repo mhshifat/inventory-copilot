@@ -2,8 +2,20 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authenticate } from "@/shopify.server";
+import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import { ChevronLeftIcon, PlayCircleIcon } from "lucide-react";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+    const { billing, redirect } = await authenticate.admin(request);
+
+    const existingBilling = await billing.check({});
+    const currentBilling = existingBilling.appSubscriptions?.[0];
+    if (currentBilling?.status !== "ACTIVE") return redirect("/app/pricing", 303);
+
+    return {};
+}
 
 export default function Help() {
     const navigate = useNavigate();

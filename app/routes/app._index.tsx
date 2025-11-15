@@ -23,16 +23,21 @@ export const loader = async (args: LoaderFunctionArgs) => {
     productsCount: 0,
     settings: null as Pick<Setting, "id"> | null,
     steps: {
+      billing: {},
       sync: {},
       settings: {}
     } as {
+      billing: OnboardingStep;
       sync: OnboardingStep;
       settings: OnboardingStep;
     },
   }
 
   try {
-    const { session, redirect } = await authenticate.admin(args.request);
+    const { session, redirect, billing } = await authenticate.admin(args.request);
+    const existingBilling = await billing.check({});
+    const currentBilling = existingBilling.appSubscriptions?.[0];
+
     const shop = await prisma.shop.findUnique({
       where: {
         domain: session.shop
@@ -72,6 +77,13 @@ export const loader = async (args: LoaderFunctionArgs) => {
       description: "Set up your preferences for inventory forecasting.",
       route: "/app/settings",
       completed: !!shop.settings,
+    };
+    response.steps.billing = {
+      id: "billing",
+      title: "Set up your billing",
+      description: "Choose a plan and set up your billing information.",
+      route: "/app/pricing",
+      completed: currentBilling?.status === "ACTIVE"
     };
 
     const allCompleted = Object.values(response.steps).every(step => step.completed);
