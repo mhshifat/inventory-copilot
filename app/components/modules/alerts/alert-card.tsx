@@ -38,10 +38,10 @@ const getSeverityBadge = (severity: AlertSeverity) => {
 
 const formatTimestamp = (date: Date) => {
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now.getTime() - new Date(date).getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 1) {
-        const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+        const diffInMinutes = Math.floor((now.getTime() - new Date(date).getTime()) / (1000 * 60));
         return `${diffInMinutes} minutes ago`;
     } else if (diffInHours < 24) {
         return `${diffInHours} hours ago`;

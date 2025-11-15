@@ -370,56 +370,10 @@ export class ProductsImportService extends BaseService {
         const inAppAlertsEnabled = settings?.in_app_alerts_enabled || false;
         const emailAlertsEnabled = settings?.email_alerts_enabled || false;
         
-        
         for (let i = 0; i < products.length; i += batchSize) {
             const batch = products.slice(i, i + batchSize);
             options.log(`Processing batch ${i / batchSize + 1} with ${batch.length} products`);
             const now = new Date();
-
-            for (const product of batch) {
-                const shouldSendAlert = product.totalInventory !== null && (product.totalInventory <= lowStockThreshold);
-
-                if ((product.totalInventory || 0) > lowStockThreshold) {
-                    await prisma.alert.create({
-                        data: {
-                            shop_id: shopId,
-                            shopify_product_id: BigInt(product.id),
-                            message: `Stock replenished for product "${product.title}". Current inventory: ${product.totalInventory}. Threshold: ${lowStockThreshold}.`,
-                            created_at: now,
-                            updated_at: now,
-                            productImage: product.image || "",
-                            productName: product.title,
-                            severity: "RESTOCKED",
-                        }
-                    })
-                }
-
-                if (shouldSendAlert && inAppAlertsEnabled) {
-                    await prisma.alert.create({
-                        data: {
-                            shop_id: shopId,
-                            shopify_product_id: BigInt(product.id),
-                            message: `Low stock alert for product "${product.title}". Current inventory: ${product.totalInventory}. Threshold: ${lowStockThreshold}.`,
-                            created_at: now,
-                            updated_at: now,
-                            productImage: product.image || "",
-                            productName: product.title,
-                            severity: ((product?.totalInventory || 0) <= (lowStockThreshold / 2)) ? "CRITICAL" : "WARNING",
-                        }
-                    });
-                }
-
-                if (shouldSendAlert && emailAlertsEnabled) {
-                    await addLowStockAlertJob({
-                        shopId: shopId,
-                        shop: settings?.shop.domain || "",
-                        syncLogId: 0,
-                        currentStock: product.totalInventory || 0,
-                        threshold: lowStockThreshold,
-                        to: settings?.alert_email || "",
-                    });
-                }
-            }
             
             const values = batch.map((product) => [
                 BigInt(product.id),
@@ -526,7 +480,72 @@ export class ProductsImportService extends BaseService {
                         variantRows = [];
                         global.gc && global.gc();
                     }
-                })
+                });
+
+                for (const product of batch) {
+                    const shouldSendAlert = product.totalInventory !== null && (product.totalInventory <= lowStockThreshold);
+                    
+                    if ((product.totalInventory || 0) > lowStockThreshold) {
+                        const existingAlert = await prisma.alert.findFirst({
+                            where: {
+                                shopify_product_id: BigInt(product.id),
+                                alert_sent_at: {
+                                    not: null
+                                },
+                                severity: {
+                                    in: ["CRITICAL", "WARNING"]
+                                }
+                            }
+                        });
+
+                        if (existingAlert) {
+                            await prisma.alert.deleteMany({
+                                where: {
+                                    shopify_product_id: existingAlert.shopify_product_id,
+                                }
+                            });
+                            await prisma.alert.create({
+                                data: {
+                                    shop_id: shopId,
+                                    shopify_product_id: BigInt(product.id),
+                                    message: `Stock replenished for product "${product.title}". Current inventory: ${product.totalInventory}. Threshold: ${lowStockThreshold}.`,
+                                    created_at: now,
+                                    updated_at: now,
+                                    productImage: product.image || "",
+                                    productName: product.title,
+                                    severity: "RESTOCKED",
+                                }
+                            })
+                        }
+                    }
+
+                    if (shouldSendAlert && inAppAlertsEnabled) {
+                        await prisma.alert.create({
+                            data: {
+                                shop_id: shopId,
+                                shopify_product_id: BigInt(product.id),
+                                message: `Low stock alert for product "${product.title}". Current inventory: ${product.totalInventory}. Threshold: ${lowStockThreshold}.`,
+                                created_at: now,
+                                updated_at: now,
+                                productImage: product.image || "",
+                                productName: product.title,
+                                severity: ((product?.totalInventory || 0) <= (lowStockThreshold / 2)) ? "CRITICAL" : "WARNING",
+                                alert_sent_at: now
+                            }
+                        });
+                    }
+
+                    if (shouldSendAlert && emailAlertsEnabled) {
+                        await addLowStockAlertJob({
+                            shopId: shopId,
+                            shop: settings?.shop.domain || "",
+                            syncLogId: 0,
+                            currentStock: product.totalInventory || 0,
+                            threshold: lowStockThreshold,
+                            to: settings?.alert_email || "",
+                        });
+                    }
+                }
             } catch (err) {
                 throw new Error(`Database error during batch processing: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
             }

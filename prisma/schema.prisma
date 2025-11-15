@@ -221,6 +221,7 @@ model Alert {
 
   created_at                DateTime    @default(now())
   updated_at                DateTime    @updatedAt
+  alert_sent_at             DateTime?
 
   shopify_product_id        BigInt
   product                   Product     @relation(fields: [shopify_product_id], references: [shopify_id], onDelete: Cascade)

@@ -140,6 +140,7 @@ CREATE TABLE "alerts" (
     "status" "AlertStatus" NOT NULL DEFAULT 'UNREAD',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "alert_sent_at" TIMESTAMP(3),
     "shopify_product_id" BIGINT NOT NULL,
     "shop_id" INTEGER NOT NULL,
 

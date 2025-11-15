@@ -141,7 +141,7 @@ export default function Settings() {
       lowStockThreshold: "",
       emailAlertsEnabled: false,
       alertEmail: undefined,
-      inAppAlertsEnabled: false,
+      inAppAlertsEnabled: true,
       units: "UNITS",
     }
   });
