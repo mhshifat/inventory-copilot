@@ -4,6 +4,7 @@ import { pubRedisConnection, redisClient } from './app/lib/redis.server';
 import { upsertProductWorker } from './app/services/workers/upsert-product-worker.server';
 import { createProductsImportWorker } from './app/services/workers/import-products-worker.server';
 import { upsertOrderWorker } from './app/services/workers/upsert-order-worker.server';
+import { lowStockAlertWorker } from './app/services/workers/low-stock-alert-worker.server';
 
 (async () => {
   try {
@@ -11,6 +12,7 @@ import { upsertOrderWorker } from './app/services/workers/upsert-order-worker.se
         createProductsImportWorker(),
         upsertProductWorker(),
         upsertOrderWorker(),
+        lowStockAlertWorker(),
     ];
   
     console.log({ "Running Workers": workers.map((worker) => worker?.name) });

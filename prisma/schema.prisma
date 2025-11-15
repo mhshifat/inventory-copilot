@@ -34,6 +34,7 @@ enum SyncLogType {
   ORDERS_PAID
   ORDER_PARTIAL_FULFILL
   ORDERS_UPDATE
+  LOW_STOCK_ALERT
 }
 
 model Session {
@@ -186,7 +187,7 @@ model Setting {
   low_stock_threshold       String
   email_alerts_enabled      Boolean
   alert_email               String?
-  in_app_alerts_enabled     Boolean
+  in_app_alerts_enabled     Boolean     @default(true)
   units                     String?
 
   created_at                DateTime    @default(now())
@@ -221,8 +222,8 @@ model Alert {
   created_at                DateTime    @default(now())
   updated_at                DateTime    @updatedAt
 
-  product_id                Int
-  product                   Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  shopify_product_id        BigInt
+  product                   Product     @relation(fields: [shopify_product_id], references: [shopify_id], onDelete: Cascade)
 
   shop_id                   Int         
   shop                      Shop        @relation(fields: [shop_id], references: [id], onDelete: Cascade)

@@ -2,7 +2,7 @@
 CREATE TYPE "SyncLogStatus" AS ENUM ('QUEUED', 'RUNNING', 'COMPLETED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "SyncLogType" AS ENUM ('PRODUCTS_IMPORT', 'ORDERS_IMPORT');
+CREATE TYPE "SyncLogType" AS ENUM ('PRODUCTS_IMPORT', 'ORDERS_IMPORT', 'PRODUCTS_UPDATE', 'PRODUCTS_CREATE', 'PRODUCTS_DELETE', 'ORDERS_CANCEL', 'ORDERS_CREATE', 'ORDERS_DELETE', 'ORDERS_EDIT', 'ORDERS_FULFILL', 'ORDERS_PAID', 'ORDER_PARTIAL_FULFILL', 'ORDERS_UPDATE', 'LOW_STOCK_ALERT');
 
 -- CreateEnum
 CREATE TYPE "AlertSeverity" AS ENUM ('CRITICAL', 'WARNING', 'RESTOCKED');
@@ -121,7 +121,7 @@ CREATE TABLE "settings" (
     "low_stock_threshold" TEXT NOT NULL,
     "email_alerts_enabled" BOOLEAN NOT NULL,
     "alert_email" TEXT,
-    "in_app_alerts_enabled" BOOLEAN NOT NULL,
+    "in_app_alerts_enabled" BOOLEAN NOT NULL DEFAULT true,
     "units" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -140,7 +140,7 @@ CREATE TABLE "alerts" (
     "status" "AlertStatus" NOT NULL DEFAULT 'UNREAD',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "shopify_product_id" BIGINT NOT NULL,
     "shop_id" INTEGER NOT NULL,
 
     CONSTRAINT "alerts_pkey" PRIMARY KEY ("id")
@@ -219,7 +219,7 @@ ALTER TABLE "sync_logs" ADD CONSTRAINT "sync_logs_shop_id_fkey" FOREIGN KEY ("sh
 ALTER TABLE "settings" ADD CONSTRAINT "settings_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "alerts" ADD CONSTRAINT "alerts_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "alerts" ADD CONSTRAINT "alerts_shopify_product_id_fkey" FOREIGN KEY ("shopify_product_id") REFERENCES "products"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "alerts" ADD CONSTRAINT "alerts_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE CASCADE ON UPDATE CASCADE;
