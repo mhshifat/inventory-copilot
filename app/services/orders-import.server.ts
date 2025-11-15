@@ -13,13 +13,14 @@ export interface ImportOrdersPayload {
 export interface ShopifyLineItem {
     id: string;
     quantity: number;
+    nonFulfillableQuantity: number;
     productId: string;
 }
 
 export interface ShopifyOrder {
     id: string;
     createdAt: string;
-    subtotalLineItemsQuantity: number;
+    currentSubtotalLineItemsQuantity: number;
     lineItems: ShopifyLineItem[]
 }
 
@@ -36,17 +37,79 @@ export interface BulkOperationRunForOrdersQueryResponse {
     };
 }
 
-
+interface OrderQueryResponse {
+    order: {
+        id: string;
+        createdAt: string;
+        currentSubtotalLineItemsQuantity: number;
+        fullyPaid: boolean;
+        displayFulfillmentStatus: string;
+        lineItems: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    nonFulfillableQuantity: number;
+                    product: {
+                        id: string;
+                        legacyResourceId: string;
+                    }
+                }
+            }>
+        };
+    }
+}
 
 export class OrdersImportService extends BaseService {
     constructor(
         private shopId: number,
         private syncLogId: number,
         shop: string,
-        accessToken: string
+        accessToken: string,
+        webhookId?: string
     ) {
-        super(shop, accessToken, "ORDERS_IMPORT");
+        super(shop, accessToken, webhookId ? webhookId : "ORDERS_IMPORT");
     }
+
+    private readonly ORDER_IMPORT_QUERY_FIELDS = `
+        id
+        createdAt
+        currentSubtotalLineItemsQuantity
+        lineItems {
+            edges {
+                node {
+                    id
+                    quantity
+                    nonFulfillableQuantity
+                    product {
+                        id
+                        legacyResourceId
+                    }
+                }
+            }
+        }
+    `;
+
+    private readonly ORDER_QUERY_FIELDS = `
+        id
+        createdAt
+        currentSubtotalLineItemsQuantity
+        fullyPaid
+        displayFulfillmentStatus
+        lineItems(first: 250) {
+            edges {
+                node {
+                    id
+                    quantity
+                    nonFulfillableQuantity
+                    product {
+                        id
+                        legacyResourceId
+                    }
+                }
+            }
+        }
+    `;
 
     async importOrders(_: ImportOrdersPayload) {
         try {
@@ -84,21 +147,7 @@ export class OrdersImportService extends BaseService {
                                     ) {
                                         edges {
                                             node {
-                                                id
-                                                createdAt
-                                                subtotalLineItemsQuantity
-                                                lineItems {
-                                                    edges {
-                                                        node {
-                                                            id
-                                                            quantity
-                                                            product {
-                                                                id
-                                                                legacyResourceId
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                                                ${this.ORDER_IMPORT_QUERY_FIELDS}
                                             }
                                         }
                                     }
@@ -148,7 +197,7 @@ export class OrdersImportService extends BaseService {
                     this.log(`Memory usage: ${used.toFixed(2)} MB`);
                     if (used > 100) {
                         this.log("Memory usage exceeded 100 MB");
-                        const orderArray = Array.from(orders.values()).filter((o) => Object.hasOwnProperty.call(o, "subtotalLineItemsQuantity")) as ShopifyOrder[];
+                        const orderArray = Array.from(orders.values()).filter((o) => Object.hasOwnProperty.call(o, "currentSubtotalLineItemsQuantity")) as ShopifyOrder[];
                         await OrdersImportService.batchProcessOrders(this.shopId, orderArray, {
                             log: (message: string) => this.log(message)
                         });
@@ -170,8 +219,9 @@ export class OrdersImportService extends BaseService {
                                     ...((orders.get(orderId))?.lineItems || []),
                                     {
                                         id: (chunk as unknown as { id: string }).id.replace("gid://shopify/LineItem/", ""),
-                                        productId: (chunk as unknown as { product: { id: string } }).product.id.replace("gid://shopify/Product/", ""),
+                                        productId: (chunk as unknown as { product: { id: string } }).product.id.replace("gid://shopify/Order/", ""),
                                         quantity: (chunk as unknown as { quantity: number }).quantity,
+                                        nonFulfillableQuantity: (chunk as unknown as { nonFulfillableQuantity: number }).nonFulfillableQuantity,
                                     }
                                 ]
                             });
@@ -183,7 +233,7 @@ export class OrdersImportService extends BaseService {
                             ...(orders.get(orderId) || {}),
                             id: orderId,
                             createdAt: (chunk as unknown as { createdAt: string }).createdAt,
-                            subtotalLineItemsQuantity: (chunk as unknown as { subtotalLineItemsQuantity: number }).subtotalLineItemsQuantity,
+                            currentSubtotalLineItemsQuantity: (chunk as unknown as { currentSubtotalLineItemsQuantity: number }).currentSubtotalLineItemsQuantity,
                         });
                     }
                 }
@@ -236,7 +286,7 @@ export class OrdersImportService extends BaseService {
             const now = new Date();
             const values = batch.map((order) => [
                 BigInt(order.id),
-                order.subtotalLineItemsQuantity,
+                order.currentSubtotalLineItemsQuantity,
                 new Date(order.createdAt),
                 now,
                 now,
@@ -291,6 +341,9 @@ export class OrdersImportService extends BaseService {
                         if (!orderId || !Array.isArray(order.lineItems)) continue;
 
                         for (const li of order.lineItems) {
+                            if (li.nonFulfillableQuantity > 0) {
+                                continue;
+                            }
                             lineItemsRows.push([
                                 BigInt(li.id),
                                 BigInt(li.productId),
@@ -338,6 +391,199 @@ export class OrdersImportService extends BaseService {
             } catch (err) {
                 throw new Error(`Database error during batch processing: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
             }
+        }
+    }
+
+    async handleOrderUpsertWebhook(orderId: string, type: SyncLogType) {
+        try {
+           this.log(`=============== Starting Order(${type}) Webhook ===============`);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.RUNNING,
+                    message: `Order(${type}) webhook started with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.RUNNING,
+                    type: type,
+                    message: `Order(${type}) webhook started with order(${orderId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            const productQuery = await shopifyGraphqlRequest<OrderQueryResponse>(
+                this.shop,
+                this.accessToken,
+                `
+                    query {
+                        order(id: "gid://shopify/Order/${orderId}") {
+                            ${this.ORDER_QUERY_FIELDS}
+                        }
+                    }
+                `
+            );
+            if (productQuery?.userErrors?.length) {
+                throw new Error(
+                    `Shopify User Errors: ${productQuery.userErrors.map(error => error.message).join(", ")}`
+                );
+            }
+
+            if (!productQuery.data?.order) {
+                throw new Error(`Order with ID ${orderId} not found.`);
+            }
+
+            if (!productQuery?.data?.order?.fullyPaid || productQuery?.data?.order?.displayFulfillmentStatus !== "FULFILLED") {
+                const orderExists = await prisma.order.findUnique({
+                    where: {
+                        shop_id: this.shopId,
+                        shopify_id: BigInt(orderId)
+                    }
+                });
+
+                if (orderExists) {
+                    await prisma.order.delete({
+                        where: {
+                            shop_id: this.shopId,
+                            shopify_id: BigInt(orderId)
+                        }
+                    });
+                }
+                await prisma.syncLog.update({
+                    where: { id: this.syncLogId },
+                    data: {
+                        status: SyncLogStatus.COMPLETED,
+                        message: `Order(${type}) webhook completed successfully with order(${orderId}). Order is not fully paid and fulfilled, so not continuing.`,
+                        updated_at: new Date()
+                    },
+                });
+                this.log(`=============== Finished Order(${type}) Webhook ===============`);
+                return;
+            }
+
+            const orderExists = await prisma.order.findUnique({
+                where: {
+                    shop_id: this.shopId,
+                    shopify_id: BigInt(orderId)
+                }
+            });
+
+            if (orderExists) {
+                await prisma.order.delete({
+                    where: {
+                        shop_id: this.shopId,
+                        shopify_id: BigInt(orderId)
+                    }
+                });
+            }
+
+            const orders = new Map<string, Partial<ShopifyOrder> & { id: ShopifyOrder["id"] }>();
+            const orderData = productQuery.data.order;
+            orders.set(orderId, {
+                id: orderId,
+                createdAt: orderData.createdAt,
+                currentSubtotalLineItemsQuantity: orderData.currentSubtotalLineItemsQuantity,
+                lineItems: orderData.lineItems.edges.map(edge => ({
+                    id: edge.node.id.replace("gid://shopify/LineItem/", ""),
+                    productId: edge.node.product.legacyResourceId,
+                    quantity: edge.node.quantity,
+                    nonFulfillableQuantity: edge.node.nonFulfillableQuantity
+                }))
+            });
+            await OrdersImportService.batchProcessOrders(this.shopId, Array.from(orders.values()) as ShopifyOrder[], {
+                log: (message: string) => this.log(message)
+            });
+            orders.clear();
+            global.gc && global.gc();
+            await prisma.syncLog.update({
+                where: { id: this.syncLogId },
+                data: {
+                    status: SyncLogStatus.COMPLETED,
+                    message: `Order(${type}) webhook completed successfully with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+            });
+            this.log(`=============== Finished Order(${type}) Webhook ===============`);
+        } catch (error) {
+            const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.FAILED,
+                    message: errMessage || `Order(${type}) webhook failed with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.FAILED,
+                    type: type,
+                    message: errMessage || `Order(${type}) webhook failed with order(${orderId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            this.error(`Error ${type} orders:`, error as Error);
+            this.log(`=============== Failed Order(${type}) Webhook ===============`);
+        }
+    }
+
+    async handleOrderDeleteWebhook(orderId: string, type: SyncLogType) {
+        try {
+           this.log(`=============== Starting Order(${type}) Webhook ===============`);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.RUNNING,
+                    message: `Order(${type}) webhook started with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.RUNNING,
+                    type: type,
+                    message: `Order(${type}) webhook started with order(${orderId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            
+            await prisma.order.delete({
+                where: {
+                    shop_id: this.shopId,
+                    shopify_id: BigInt(orderId)
+                }
+            });
+
+            await prisma.syncLog.update({
+                where: { id: this.syncLogId },
+                data: {
+                    status: SyncLogStatus.COMPLETED,
+                    message: `Order(${type}) webhook completed successfully with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+            });
+            this.log(`=============== Finished Order(${type}) Webhook ===============`);
+        } catch (error) {
+            const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.FAILED,
+                    message: errMessage || `Order(${type}) webhook failed with order(${orderId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.FAILED,
+                    type: type,
+                    message: errMessage || `Order(${type}) webhook failed with order(${orderId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            this.error("Error deleting orders:", error as Error);
+            this.log(`=============== Failed Order(${type}) Webhook ===============`);
         }
     }
 }

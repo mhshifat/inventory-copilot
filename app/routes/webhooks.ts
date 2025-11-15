@@ -1,8 +1,9 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import prisma from "@/lib/db.server";
-import { type Session } from "@prisma/client";
+import { SyncLogType, type Session } from "@prisma/client";
 import { addUpsertProductJob } from "@/services/workers/upsert-product-worker.server";
+import { addUpsertOrderJob } from "@/services/workers/upsert-order-worker.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { topic, shop, session, admin, payload } = await authenticate.webhook(request);
@@ -174,6 +175,307 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                     });
                 }
                 console.error(`Error processing PRODUCTS_DELETE webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_CANCELLED": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_CANCEL",
+                        message: `Orders cancelled webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_CANCEL,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_CANCEL(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_CANCEL webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_CREATE": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_CREATE",
+                        message: `Orders created webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_CREATE,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_CREATE(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_CREATE webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_DELETE": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_DELETE",
+                        message: `Orders deleted webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_DELETE,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_DELETE(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_DELETE webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_FULFILLED": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_FULFILL",
+                        message: `Orders fulfilled webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_FULFILL,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_FULFILL(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_FULFILL webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_PAID": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_PAID",
+                        message: `Orders paid webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_PAID,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_PAID(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_PAID webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_PARTIALLY_FULFILLED": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDER_PARTIAL_FULFILL",
+                        message: `Orders partially fulfilled webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDER_PARTIAL_FULFILL,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDER_PARTIAL_FULFILL(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDER_PARTIAL_FULFILL webhook for shop(${shop}):`, err);
+                throw err;
+            }
+        }else {
+          console.error(`[${topic}]:Shop(${shop}) not found`);
+        }
+
+        break;
+      }
+      case "ORDERS_UPDATED": {
+        if (shopRes && webhookId) {
+            let syncLogId: number | null = null;
+            try {
+                const syncLog = await prisma.syncLog.create({
+                    data: {
+                        shop_id: shopRes.id,
+                        type: "ORDERS_UPDATE",
+                        message: `Orders updated webhook received`,
+                        status: "QUEUED",
+                        created_at: new Date(),
+                    },
+                });
+                syncLogId = syncLog.id;
+                await addUpsertOrderJob({
+                    shopId: shopRes.id,
+                    accessToken: (session as unknown as Session).access_token,
+                    orderId: payload.id,
+                    webhookId: webhookId,
+                    syncLogId: syncLogId,
+                    shop: shopRes.domain,
+                    type: SyncLogType.ORDERS_UPDATE,
+                });
+            } catch (err) {
+                if (syncLogId) {
+                    await prisma.syncLog.update({
+                        where: { id: syncLogId },
+                        data: {
+                            message: `Error processing ORDERS_UPDATE(${payload.id}) webhook: ${err instanceof Error ? err.message : String(err)}`,
+                            status: "FAILED",
+                            updated_at: new Date(),
+                        },
+                    });
+                }
+                console.error(`Error processing ORDERS_UPDATE webhook for shop(${shop}):`, err);
                 throw err;
             }
         }else {
