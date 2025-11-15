@@ -23,6 +23,9 @@ enum SyncLogStatus {
 enum SyncLogType {
   PRODUCTS_IMPORT
   ORDERS_IMPORT
+  PRODUCTS_UPDATE
+  PRODUCTS_CREATE
+  PRODUCTS_DELETE
 }
 
 model Session {

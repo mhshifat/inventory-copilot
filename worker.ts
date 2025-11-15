@@ -1,13 +1,14 @@
+import 'dotenv/config';
 import { disconnectPrisma } from './app/lib/db.server';
 import { pubRedisConnection, redisClient } from './app/lib/redis.server';
+import { upsertProductWorker } from './app/services/workers/upsert-product-worker.server';
 import { createProductsImportWorker } from './app/services/workers/import-products-worker.server';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 (async () => {
   try {
     const workers = [
         createProductsImportWorker(),
+        upsertProductWorker(),
     ];
   
     console.log({ "Running Workers": workers.map((worker) => worker?.name) });

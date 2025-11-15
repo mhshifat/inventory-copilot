@@ -8,6 +8,7 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 export const action = async (args: ActionFunctionArgs) => {
     try {
         const { session } = await authenticate.admin(args.request);
+        
         const shop = await prisma.shop.findUnique({
             where: {
                 domain: session.shop

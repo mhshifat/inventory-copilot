@@ -39,17 +39,128 @@ export interface BulkOperationRunForProductsQueryResponse {
     };
 }
 
-
+export interface ProductQueryResponse {
+    product: {
+        id: string;
+        title: string;
+        handle: string;
+        vendor: string;
+        totalInventory: number;
+        media: {
+            edges: Array<{
+                node: {
+                    preview: {
+                        image: {
+                            url: string;
+                        };
+                    };
+                };
+            }>;
+        },
+        collections: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    title: string;
+                    __typename: string;
+                };
+            }>;
+        };
+        variants: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    title: string;
+                    sku: string | null;
+                };
+            }>;
+        };
+    };
+}
 
 export class ProductsImportService extends BaseService {
     constructor(
         private shopId: number,
         private syncLogId: number,
         shop: string,
-        accessToken: string
+        accessToken: string,
+        webhookId?: string
     ) {
-        super(shop, accessToken, "PRODUCTS_IMPORT");
+        super(shop, accessToken, webhookId ? webhookId : "PRODUCTS_IMPORT");
     }
+
+    private PRODUCT_IMPORT_QUERY_FIELDS = `
+        id
+        title
+        handle
+        totalInventory
+        media {
+            edges {
+                node {
+                    preview {
+                        image {
+                            url
+                        }
+                    }
+                }
+            }
+        }
+        vendor
+        collections {
+            edges {
+                node {
+                    id
+                    title
+                    __typename
+                }
+            }
+        }
+        variants {
+            edges {
+                node {
+                    id
+                    title
+                    sku
+                }
+            }
+        }
+    `;
+    private PRODUCT_QUERY_FIELDS = `
+        id
+        title
+        handle
+        totalInventory
+        media(first: 250) {
+            edges {
+                node {
+                    preview {
+                        image {
+                            url
+                        }
+                    }
+                }
+            }
+        }
+        vendor
+        collections(first: 250) {
+            edges {
+                node {
+                    id
+                    title
+                    __typename
+                }
+            }
+        }
+        variants(first: 250) {
+            edges {
+                node {
+                    id
+                    title
+                    sku
+                }
+            }
+        }
+    `;
 
     async importProducts(_: ImportProductsPayload) {
         try {
@@ -82,40 +193,7 @@ export class ProductsImportService extends BaseService {
                                     products {
                                         edges {
                                             node {
-                                                id
-                                                title
-                                                handle
-                                                totalInventory
-                                                media {
-                                                    edges {
-                                                        node {
-                                                            preview {
-                                                                image {
-                                                                    url
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                vendor
-                                                collections {
-                                                    edges {
-                                                        node {
-                                                            id
-                                                            title
-                                                            __typename
-                                                        }
-                                                    }
-                                                }
-                                                variants {
-                                                    edges {
-                                                        node {
-                                                            id
-                                                            title
-                                                            sku
-                                                        }
-                                                    }
-                                                }
+                                                ${this.PRODUCT_IMPORT_QUERY_FIELDS}
                                             }
                                         }
                                     }
@@ -389,6 +467,156 @@ export class ProductsImportService extends BaseService {
             } catch (err) {
                 throw new Error(`Database error during batch processing: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
             }
+        }
+    }
+
+    async handleProductUpsertWebhook(productId: string, type: "CREATED" | "UPDATED") {
+        try {
+           this.log(`=============== Starting Product(${type}) Webhook ===============`);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.RUNNING,
+                    message: `Product(${type}) webhook started with product(${productId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.RUNNING,
+                    type: type === "CREATED" ? SyncLogType.PRODUCTS_CREATE : SyncLogType.PRODUCTS_UPDATE,
+                    message: `Product(${type}) webhook started with product(${productId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            const productQuery = await shopifyGraphqlRequest<ProductQueryResponse>(
+                this.shop,
+                this.accessToken,
+                `
+                    query {
+                        product(id: "gid://shopify/Product/${productId}") {
+                            ${this.PRODUCT_QUERY_FIELDS}
+                        }
+                    }
+                `
+            );
+            if (productQuery?.userErrors?.length) {
+                throw new Error(
+                    `Shopify User Errors: ${productQuery.userErrors.map(error => error.message).join(", ")}`
+                );
+            }
+            if (!productQuery.data?.product) {
+                throw new Error(`Product with ID ${productId} not found.`);
+            }
+            const products = new Map<string, Partial<ShopifyProduct> & { id: ShopifyProduct["id"] }>();
+            const productData = productQuery.data.product;
+            products.set(productId, {
+                id: productId,
+                title: productData.title,
+                handle: productData.handle,
+                vendor: productData.vendor || null,
+                totalInventory: productData.totalInventory || null,
+                image: productData.media.edges[0]?.node.preview.image.url || null,
+                variants: productData.variants.edges.map(edge => ({
+                    id: edge.node.id.replace("gid://shopify/ProductVariant/", ""),
+                    title: edge.node.title,
+                    sku: edge.node.sku || null
+                })),
+                collections: productData.collections.edges.map(edge => edge.node.title)
+            });
+            await ProductsImportService.batchProcessProducts(this.shopId, Array.from(products.values()) as ShopifyProduct[], {
+                log: (message: string) => this.log(message)
+            });
+            products.clear();
+            global.gc && global.gc();
+            await prisma.syncLog.update({
+                where: { id: this.syncLogId },
+                data: {
+                    status: SyncLogStatus.COMPLETED,
+                    message: `Product(${type}) webhook completed successfully with product(${productId}).`,
+                    updated_at: new Date()
+                },
+            });
+            this.log(`=============== Finished Product(${type}) Webhook ===============`);
+        } catch (error) {
+            const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.FAILED,
+                    message: errMessage || `Product(${type}) webhook failed with product(${productId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.FAILED,
+                    type: type === "CREATED" ? SyncLogType.PRODUCTS_CREATE : SyncLogType.PRODUCTS_UPDATE,
+                    message: errMessage || `Product(${type}) webhook failed with product(${productId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            this.error(`Error ${type} products:`, error as Error);
+            this.log(`=============== Failed Product(${type}) Webhook ===============`);
+        }
+    }
+
+    async handleProductDeleteWebhook(productId: string, type: "DELETED") {
+        try {
+           this.log(`=============== Starting Product(${type}) Webhook ===============`);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.RUNNING,
+                    message: `Product(${type}) webhook started with product(${productId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.RUNNING,
+                    type: SyncLogType.PRODUCTS_DELETE,
+                    message: `Product(${type}) webhook started with product(${productId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            
+            await prisma.product.delete({
+                where: {
+                    shop_id: this.shopId,
+                    shopify_id: BigInt(productId)
+                }
+            });
+
+            await prisma.syncLog.update({
+                where: { id: this.syncLogId },
+                data: {
+                    status: SyncLogStatus.COMPLETED,
+                    message: `Product(${type}) webhook completed successfully with product(${productId}).`,
+                    updated_at: new Date()
+                },
+            });
+            this.log(`=============== Finished Product(${type}) Webhook ===============`);
+        } catch (error) {
+            const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            await prisma.syncLog.upsert({
+                where: { id: this.syncLogId },
+                update: {
+                    status: SyncLogStatus.FAILED,
+                    message: errMessage || `Product(${type}) webhook failed with product(${productId}).`,
+                    updated_at: new Date()
+                },
+                create: {
+                    status: SyncLogStatus.FAILED,
+                    type: SyncLogType.PRODUCTS_DELETE,
+                    message: errMessage || `Product(${type}) webhook failed with product(${productId}).`,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    shop_id: this.shopId
+                }
+            });
+            this.error("Error deleting products:", error as Error);
+            this.log(`=============== Failed Product(${type}) Webhook ===============`);
         }
     }
 }
