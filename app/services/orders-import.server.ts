@@ -219,7 +219,7 @@ export class OrdersImportService extends BaseService {
                                     ...((orders.get(orderId))?.lineItems || []),
                                     {
                                         id: (chunk as unknown as { id: string }).id.replace("gid://shopify/LineItem/", ""),
-                                        productId: (chunk as unknown as { product: { id: string } }).product.id.replace("gid://shopify/Order/", ""),
+                                        productId: (chunk as unknown as { product: { id: string } }).product.id.replace("gid://shopify/Product/", ""),
                                         quantity: (chunk as unknown as { quantity: number }).quantity,
                                         nonFulfillableQuantity: (chunk as unknown as { nonFulfillableQuantity: number }).nonFulfillableQuantity,
                                     }
