@@ -7,7 +7,7 @@
     "noImplicitAny": true,
     "moduleResolution": "bundler",
     "sourceMap": false,
-    "outDir": "api",
+    "outDir": "dist",
     "baseUrl": ".",
     "checkJs": false,
     "strict": true,
