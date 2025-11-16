@@ -1,2 +1,0 @@
--- AlterEnum
-ALTER TYPE "SyncLogType" ADD VALUE 'BILLING_PLAN_CHANGE';
