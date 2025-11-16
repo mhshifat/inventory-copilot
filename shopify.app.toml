@@ -1,8 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "ffb544c0febafc2abaf07bec08aaad44"
-name = "inventory-copilot-app"
-application_url = "https://clouds-anime-fleece-recommendation.trycloudflare.com"
+name = "Inventory Copilot"
+handle = "inventory-copilot-app"
+application_url = "https://inventory-copilot-six.vercel.app"
 embedded = true
 
 [build]
@@ -13,7 +14,7 @@ api_version = "2026-01"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled", "products/create", "products/update", "products/delete", "orders/create", "orders/delete", "orders/cancelled", "orders/fulfilled", "orders/paid", "orders/partially_fulfilled", "orders/updated" ]
-  uri = "/webhooks"
+  uri = "https://hkdk.events/i1tjfeqzic42c3"
   include_fields = [
     "id",
     "created_at",
@@ -26,4 +27,4 @@ api_version = "2026-01"
 scopes = "write_products,read_products,read_orders,read_inventory"
 
 [auth]
-redirect_urls = [ "https://clouds-anime-fleece-recommendation.trycloudflare.com/api/auth" ]
+redirect_urls = [ "https://inventory-copilot-six.vercel.app/api/auth" ]
