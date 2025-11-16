@@ -17,7 +17,7 @@
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
-    "worker:build": "tsc -p ./tsconfig.worker.json && tsc-esm-fix --target=api",
+    "worker:build": "tsc -p ./tsconfig.worker.json && tsc-esm-fix --target=api --entry api/worker.js",
     "worker:start": "node ./api/worker.js",
     "worker:dev": "tsx watch ./worker.ts",
     "worker:test": "npm run worker:build && npm run worker:start"
