@@ -1,21 +1,15 @@
-FROM node:18-alpine
-RUN apk add --no-cache openssl
-
-EXPOSE 3000
-
+# Stage 1: build
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-ENV NODE_ENV=production
-
-COPY package.json package-lock.json* ./
-
-RUN npm ci --omit=dev && npm cache clean --force
-# Remove CLI packages since we don't need them in production by default.
-# Remove this line if you want to run CLI commands in your container.
-RUN npm remove @shopify/cli
-
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
 COPY . .
+RUN npm run worker:build
 
-RUN npm run build
-
-CMD ["npm", "run", "docker-start"]
+# Stage 2: run
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+RUN npm install --production --legacy-peer-deps
+CMD ["node", "dist/worker.js"]
