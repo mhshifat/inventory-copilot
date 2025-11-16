@@ -4,6 +4,7 @@ node_modules
 /.cache
 /build
 /dist
+/api
 /app/build
 /public/build/
 /public/_dev
