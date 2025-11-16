@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "dist/worker.js": {
+      "runtime": "edge"
+    }
+  },
+  "routes": [
+    { "src": "/.*", "dest": "dist/worker.js" }
+  ]
+}
