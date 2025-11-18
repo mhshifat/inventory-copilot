@@ -1,4 +1,4 @@
-import prisma from "@/lib/db.server";
+import prisma from "../lib/db.server";
 import { BaseService } from "./base-srv.server";
 import type { SyncLogType } from "@prisma/client";
 import { SyncLogStatus } from "@prisma/client";

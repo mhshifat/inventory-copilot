@@ -3,7 +3,7 @@
 client_id = "ffb544c0febafc2abaf07bec08aaad44"
 name = "Inventory Copilot"
 handle = "inventory-copilot-app"
-application_url = "https://inventory-copilot-six.vercel.app"
+application_url = "https://inventory-copilot-30862fa79df0.herokuapp.com"
 embedded = true
 
 [build]
@@ -27,4 +27,4 @@ api_version = "2026-01"
 scopes = "write_products,read_products,read_orders,read_inventory"
 
 [auth]
-redirect_urls = [ "https://inventory-copilot-six.vercel.app/api/auth" ]
+redirect_urls = [ "https://inventory-copilot-30862fa79df0.herokuapp.com/api/auth" ]
