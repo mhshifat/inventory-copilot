@@ -1,0 +1,14 @@
+build:
+  docker:
+    web: Dockerfile
+    worker: Dockerfile
+run:
+  web: npm run docker-start
+  worker:
+    command:
+      - npm run worker:start
+    image: web
+release:
+  image: web
+  command:
+    - echo 'Starting server after deployment!';
