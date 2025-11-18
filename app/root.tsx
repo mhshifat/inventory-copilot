@@ -19,24 +19,41 @@ export const links: LinksFunction = () => [
 
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
-    const { billing } = await authenticate.admin(request);
+    const { billing, admin } = await authenticate.admin(request);
     const billingPlans = Object.values(BILLING_OBJECTS);
     const existingBilling = await billing.check({});
     const currentBilling = existingBilling.appSubscriptions?.[0];
 
+    const shopifyProductsResponse = await admin.graphql(
+      `#graphql
+      query {
+        productsCount {
+          count
+        }
+      }`,
+    );
+
+    const shopifyProductsData = await shopifyProductsResponse?.json();
+    const totalShopifyProducts = shopifyProductsData?.data?.productsCount?.count || 0;
+
+    const billingPlanProductLimit = billingPlans.find(plan => 
+      plan.title === currentBilling?.name
+    )?.attributes?.productLimit || 0;
+
     // Return the shop domain if authenticated
     return {
       currentBilling: currentBilling || null,
-      billingPlans
+      billingPlans,
+      shouldShowUpgradePrompt: billingPlanProductLimit > 0 && totalShopifyProducts > billingPlanProductLimit,
     };
   } catch (error) {
     console.log(error);
-    return { currentBilling: null, billingPlans: [] };
+    return { currentBilling: null, billingPlans: [], shouldShowUpgradePrompt: false};
   }
 }
 
 export default function App() {
-  const { currentBilling, billingPlans } = useLoaderData<typeof loader>();
+  const { currentBilling, billingPlans, shouldShowUpgradePrompt } = useLoaderData<typeof loader>();
 
   return (
     <html>
@@ -53,7 +70,7 @@ export default function App() {
       </head>
       <body>
         <ProgressBar />
-        <AppSubscription currentSubscription={currentBilling} billingPlans={billingPlans}>
+        <AppSubscription shouldShowUpgradePrompt={shouldShowUpgradePrompt} currentSubscription={currentBilling} billingPlans={billingPlans}>
           <Outlet />
         </AppSubscription>
         <ScrollRestoration />

@@ -20,9 +20,10 @@ const SubscriptionCtx = createContext<AppSubscriptionState | null>(null);
 interface AppSubscriptionProps {
     currentSubscription?: AppSubscription | null;
     billingPlans: any[]; // Adjust type as needed
+    shouldShowUpgradePrompt: boolean;
 }
 
-export default function AppSubscription({ children, currentSubscription: currentSubscriptionProps, billingPlans }: PropsWithChildren<AppSubscriptionProps>) {
+export default function AppSubscription({ children, currentSubscription: currentSubscriptionProps, billingPlans, shouldShowUpgradePrompt }: PropsWithChildren<AppSubscriptionProps>) {
     const navigate = useNavigate();
     const location = useLocation();
     const [currentSubscription, setCurrentSubscription] = useState<AppSubscription | null>(null);
@@ -42,6 +43,11 @@ export default function AppSubscription({ children, currentSubscription: current
       navigate(location.pathname + "?" + params.toString(), { replace: true });
     }
   }, [location, navigate]);
+
+  useEffect(() => {
+    console.log({ shouldShowUpgradePrompt });
+    !["/app", "/app/settings", "/app/billing"].includes(location.pathname) && shouldShowUpgradePrompt && navigate("/app/billing");
+  }, [shouldShowUpgradePrompt, location, navigate])
 
   return (
     <SubscriptionCtx.Provider value={{ currentSubscription, currentPlan }}>

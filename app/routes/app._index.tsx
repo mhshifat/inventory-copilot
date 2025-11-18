@@ -34,7 +34,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   }
 
   try {
-    const { session, redirect, billing } = await authenticate.admin(args.request);
+    const { session, redirect, billing, admin } = await authenticate.admin(args.request);
     const existingBilling = await billing.check({});
     const currentBilling = existingBilling.appSubscriptions?.[0];
 
@@ -64,12 +64,24 @@ export const loader = async (args: LoaderFunctionArgs) => {
     response.productsCount = shop._count.products;
     response.settings = shop.settings;
 
+    const shopifyProductsResponse = await admin.graphql(
+      `#graphql
+      query {
+        productsCount {
+          count
+        }
+      }`,
+    );
+
+    const shopifyProductsData = await shopifyProductsResponse?.json();
+    const totalShopifyProducts = shopifyProductsData?.data?.productsCount?.count || 0;
+
     response.steps.sync = {
       id: "sync",
       title: "Sync your Shopify inventory data",
       description: "Connect your store to get started.",
       route: "/app/import",
-      completed: shop._count.products > 0,
+      completed: shop._count.products === totalShopifyProducts,
     };
     response.steps.settings = {
       id: "preferences",
