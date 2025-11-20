@@ -2,20 +2,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authenticate } from "@/shopify.server";
-import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
-import { ChevronLeftIcon, PlayCircleIcon } from "lucide-react";
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-    const { billing, redirect } = await authenticate.admin(request);
-
-    const existingBilling = await billing.check({});
-    const currentBilling = existingBilling.appSubscriptions?.[0];
-    if (currentBilling?.status !== "ACTIVE") return redirect("/app/pricing", 303);
-
-    return {};
-}
+import { ChevronLeftIcon } from "lucide-react";
 
 export default function Help() {
     const navigate = useNavigate();
@@ -119,15 +107,7 @@ export default function Help() {
                             <CardContent className="space-y-4">
                                 {/* Video Embed Placeholder */}
                                 <div className="relative aspect-video w-full rounded-lg bg-muted flex items-center justify-center border-2 border-dashed border-border">
-                                    <div className="text-center space-y-3">
-                                        <PlayCircleIcon className="h-16 w-16 mx-auto! text-muted-foreground" />
-                                        <div>
-                                            <p className="font-semibold! text-lg!">Tutorial Video</p>
-                                            <p className="text-sm! text-muted-foreground">
-                                                Embed your Vimeo or Loom video here
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <iframe className="absolute inset-0 w-full h-full" src="https://player.vimeo.com/video/1138918043?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameBorder="0" referrerPolicy="strict-origin-when-cross-origin" title="d68f2a03-ba3a-426c-b262-63deb16ef00d"></iframe>
                                 </div>
 
                                 {/* Video Description */}

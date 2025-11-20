@@ -54,6 +54,7 @@ export default function App() {
             Home
           </Link>
           <Link to="/app/billing" rel="billing">Billing</Link>
+          <Link to="/app/help" rel="help">Help</Link>
         </NavMenu>
         <Outlet />
       </Providers>

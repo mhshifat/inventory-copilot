@@ -367,7 +367,7 @@ export class ProductsImportService extends BaseService {
             }
         });
         const lowStockThreshold = settings?.low_stock_threshold ? parseInt(settings.low_stock_threshold) : 0;
-        const inAppAlertsEnabled = settings?.in_app_alerts_enabled || false;
+        const inAppAlertsEnabled = !settings ? true : (settings?.in_app_alerts_enabled || false);
         const emailAlertsEnabled = settings?.email_alerts_enabled || false;
         
         for (let i = 0; i < products.length; i += batchSize) {
