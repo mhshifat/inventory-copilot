@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 
 const getStatusColor = (status: DashboardProductsTableData["status"]) => {
@@ -80,9 +80,17 @@ export default function DashboardProductsTable({ data, pagination, onPageChange,
                                     Product
                                 </TableHead>
                                 <TableHead
-                                    className="cursor-pointer hover:bg-muted/70 transition-colors"
+                                    className="cursor-pointer hover:bg-muted/70 transition-colors flex items-center gap-1.5"
                                 >
                                     Current Stock
+                                    <Tooltip>
+                                        <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                            <p>If current stock is different from the admin product data, then please re <Link className="text-blue-500" to="/app/import">import</Link> the products again.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </TableHead>
                                 <TableHead
                                     className="cursor-pointer hover:bg-muted/70 transition-colors"

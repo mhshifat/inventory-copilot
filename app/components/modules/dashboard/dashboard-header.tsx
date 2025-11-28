@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@remix-run/react";
-import { BarChart3Icon, BellIcon, Building2Icon, HelpCircleIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
+import { BarChart3Icon, BellIcon, Building2Icon, DownloadCloudIcon, HelpCircleIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
 
 interface DashboardHeaderProps {
     handleSyncInventory: () => void;
@@ -40,6 +40,17 @@ export default function DashboardHeader({
                 >
                     <RefreshCwIcon className="h-4 w-4" />
                     Sync Inventory
+                </Button>
+                <Button
+                    // @ts-ignore
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/app/import")}
+                    className="gap-2"
+                    data-tour-id="reimport-button"
+                >
+                    <DownloadCloudIcon className="h-4 w-4" />
+                    Re-Import
                 </Button>
                 <Button
                     // @ts-ignore
