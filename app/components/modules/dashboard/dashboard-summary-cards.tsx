@@ -23,12 +23,12 @@ export default function DashboardSummaryCards({ productsCount, lowStockCount, in
 
             <Card className="shadow-md flex-1" data-tour-id="stat-low">
                 <CardHeader className="flex flex-row items-center justify-between pb-2! space-y-0">
-                    <CardTitle className="text-sm! font-medium!">Low Stock Items</CardTitle>
+                    <CardTitle className="text-sm! font-medium!">Sales-Based Stock Status</CardTitle>
                     <AlertTriangleIcon className="h-4 w-4 text-warning" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl! font-bold!">{lowStockCount}</div>
-                    <p className="text-xs! text-muted-foreground mt-1!">Needs attention</p>
+                    <p className="text-xs! text-muted-foreground mt-1!">Calculated based on the last 30 days of sales. A product with no sales will not be counted as low stock even if its Shopify inventory is low or negative.</p>
                 </CardContent>
             </Card>
 

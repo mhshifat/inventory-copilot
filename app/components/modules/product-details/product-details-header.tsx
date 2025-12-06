@@ -6,27 +6,27 @@ import { ArrowLeftIcon } from "lucide-react";
 
 const getStatusColor = (status: string) => {
     switch (status) {
-        case "IN_STOCK":
+        case "HEALTHY":
             return "bg-success text-success-foreground";
-        case "LOW_STOCK":
+        case "AT_RISK":
             return "bg-warning text-warning-foreground";
-        case "STOCK_OUT":
+        case "CRITICAL":
             return "bg-destructive text-destructive-foreground";
         default:
-            return "";
+            return "bg-secondary text-secondary-foreground";
     }
 };
 
 const getStatusText = (status: string) => {
     switch (status) {
-        case "IN_STOCK":
+        case "HEALTHY":
             return "In Stock";
-        case "LOW_STOCK":
+        case "AT_RISK":
             return "Low Stock";
-        case "STOCK_OUT":
+        case "CRITICAL":
             return "Stock Out";
         default:
-            return "";
+            return "No Sale Yet";
     }
 };
 

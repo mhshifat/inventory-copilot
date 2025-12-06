@@ -8,27 +8,27 @@ import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 
 const getStatusColor = (status: DashboardProductsTableData["status"]) => {
     switch (status) {
-        case "IN_STOCK":
+        case "HEALTHY":
             return "bg-success text-success-foreground";
-        case "LOW_STOCK":
+        case "AT_RISK":
             return "bg-warning text-warning-foreground";
-        case "STOCK_OUT":
+        case "CRITICAL":
             return "bg-destructive text-destructive-foreground";
         default:
-            return "";
+            return "bg-secondary text-secondary-foreground";
     }
 };
 
 const getStatusTitle = (status: DashboardProductsTableData["status"]) => {
     switch (status) {
-        case "IN_STOCK":
+        case "HEALTHY":
             return "In Stock";
-        case "LOW_STOCK":
+        case "AT_RISK":
             return "Low Stock";
-        case "STOCK_OUT":
+        case "CRITICAL":
             return "Stock Out";
         default:
-            return "";
+            return "No Sale Yet";
     }
 };
 
@@ -42,7 +42,7 @@ export interface DashboardProductsTableData {
     avgDailySales: number;
     daysUntilOut: number;
     suggestedReorder: number;
-    status: "LOW_STOCK" | "STOCK_OUT" | "IN_STOCK";
+    status: "NO_RECENT_SALES" | "CRITICAL" | "AT_RISK" | "HEALTHY";
     supplierMinOrderQty: number | null;
 }
 

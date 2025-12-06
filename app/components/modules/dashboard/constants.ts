@@ -9,7 +9,7 @@ export const tourSteps: TourStep[] = [
   },
   {
     target: '[data-tour-id="stat-low"]',
-    title: "Low Stock Items",
+    title: "Sales-Based Stock Status",
     description: "Quickly spot items that need attention to prevent stockouts.",
     position: "bottom",
   },

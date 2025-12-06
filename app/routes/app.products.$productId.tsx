@@ -104,15 +104,11 @@ export const loader = async (args: LoaderFunctionArgs) => {
             SELECT 
                 *,
                 CASE
-                    WHEN days_until_out IS NULL 
-                        THEN 'IN_STOCK'
-                    WHEN (COALESCE(days_until_out, 0)) = 0 
-                        THEN 'STOCK_OUT'
-                    WHEN (COALESCE(days_until_out, 0)) <= ${lowStockThreshold} 
-                        THEN 'LOW_STOCK'
-                    ELSE 
-                        'IN_STOCK'
-                END as stock_status
+                    WHEN avg_daily_sales = 0 THEN 'NO_RECENT_SALES'
+                    WHEN days_until_out = 0 THEN 'CRITICAL'
+                    WHEN days_until_out <= ${lowStockThreshold} THEN 'AT_RISK'
+                    ELSE 'HEALTHY'
+                END AS stock_status
             FROM daily_sales
         )
 
@@ -156,7 +152,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         avg_daily_sales: 0,
         days_until_out: null,
         suggested_reorder: 0,
-        stock_status: 'IN_STOCK' | 'LOW_STOCK' | 'STOCK_OUT',
+        stock_status: 'NO_RECENT_SALES' | 'CRITICAL' | 'AT_RISK' | 'HEALTHY',
         supplier_name: string | null,
         supplier_contact_email: string | null,
         supplier_notes: string | null
@@ -250,7 +246,7 @@ export interface ProductDetailsData {
     avgDailySales: number;
     name: string;
     collection: string;
-    status: "IN_STOCK" | "LOW_STOCK" | "STOCK_OUT";
+    status: "NO_RECENT_SALES" | "CRITICAL" | "AT_RISK" | "HEALTHY";
     image: string;
     daysUntilOut: number | null;
     suggestedReorder: number;

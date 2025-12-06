@@ -98,18 +98,18 @@ export const loader = async (args: LoaderFunctionArgs) => {
         WITH products_with_sales AS (
             WITH daily_sales AS (
                 WITH avgSales AS (
-                    WITH sales as (
+                    WITH sales AS (
                         SELECT
                             p.*,
-                            COALESCE(SUM(li.quantity), 0) as total_units_sold,
+                            COALESCE(SUM(li.quantity), 0) AS total_units_sold,
                             MAX(s.lead_time) AS supplier_lead_time,
                             MAX(s.min_order_qty) AS supplier_min_order_qty
-                        FROM products as p
+                        FROM products AS p
 
-                        LEFT JOIN line_items as li
+                        LEFT JOIN line_items AS li
                         ON p.shopify_id = li.product_shopify_id
 
-                        LEFT JOIN suppliers as s
+                        LEFT JOIN suppliers AS s
                         ON p.supplier_id = s.id
 
                         GROUP BY p.id
@@ -117,7 +117,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
                     SELECT
                         *,
-                        CEIL(total_units_sold::numeric / ${forecastPeriod}) as avg_daily_sales
+                        CEIL(total_units_sold::numeric / ${forecastPeriod}) AS avg_daily_sales
                     FROM sales
                 )
 
@@ -125,25 +125,26 @@ export const loader = async (args: LoaderFunctionArgs) => {
                     *,
                     CASE
                         WHEN avg_daily_sales > 0
-                            THEN CEIL(total_inventory::numeric / avg_daily_sales)
-                            ELSE null
-                    END as days_until_out,
-                    (COALESCE(avg_daily_sales, 0) * (CASE WHEN supplier_lead_time IS NOT NULL THEN supplier_lead_time ELSE ${leadTimeDays} END)) as suggested_reorder
+                        THEN CEIL(total_inventory::numeric / avg_daily_sales)
+                        ELSE NULL
+                    END AS days_until_out,
+                    (COALESCE(avg_daily_sales, 0) * 
+                        (CASE WHEN supplier_lead_time IS NOT NULL 
+                            THEN supplier_lead_time 
+                            ELSE ${leadTimeDays} END
+                        )
+                    ) AS suggested_reorder
                 FROM avgSales
             )
 
             SELECT 
                 *,
                 CASE
-                    WHEN days_until_out IS NULL 
-                        THEN 'IN_STOCK'
-                    WHEN (COALESCE(days_until_out, 0)) = 0 
-                        THEN 'STOCK_OUT'
-                    WHEN (COALESCE(days_until_out, 0)) <= ${lowStockThreshold} 
-                        THEN 'LOW_STOCK'
-                    ELSE 
-                        'IN_STOCK'
-                END as stock_status
+                    WHEN avg_daily_sales = 0 THEN 'NO_RECENT_SALES'
+                    WHEN days_until_out = 0 THEN 'CRITICAL'
+                    WHEN days_until_out <= ${lowStockThreshold} THEN 'AT_RISK'
+                    ELSE 'HEALTHY'
+                END AS stock_status
             FROM daily_sales
         )
 
@@ -280,7 +281,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         days_until_out: number | null,
         suggested_reorder: number,
         supplier_min_order_qty: number,
-        stock_status: "STOCK_OUT" | "LOW_STOCK" | "IN_STOCK",
+        stock_status: "NO_RECENT_SALES" | "CRITICAL" | "AT_RISK" | "HEALTHY",
     }): DashboardProductsTableData => {
         return {
             id: product.id,
