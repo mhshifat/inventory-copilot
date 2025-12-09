@@ -456,7 +456,7 @@ export default function PricingPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl! font-bold! text-foreground mb-4">Pricing</h1>
         <p className="text-muted-foreground text-lg! max-w-2xl! mx-auto!">
-          Choose the perfect plan for your business needs. Starter, Pro, and Business plans include a 3-day free trial.
+          Choose the perfect plan for your business needs. Pro, and Business plans include a 3-day free trial.
         </p>
       </div>
 
