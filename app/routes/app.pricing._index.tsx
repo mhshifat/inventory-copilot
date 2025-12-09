@@ -578,7 +578,7 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
           <div>
             <p className="mb-2">
-              <strong>3-day free trial:</strong> Available for Starter, Pro, and Business plans. You can cancel anytime during this trial period for a full refund, 
+              <strong>3-day free trial:</strong> Available for Pro, and Business plans. You can cancel anytime during this trial period for a full refund, 
               and your subscription will be cancelled immediately.
             </p>
           </div>
