@@ -37,7 +37,7 @@ export const BILLING_OBJECTS = {
       "Up to 5,000 total products in the store",
     ],
     trialDays: 3,
-    amount: 39,
+    amount: 2.99,
     currencyCode: "USD",
     interval: "month",
     attributes: {
@@ -53,7 +53,7 @@ export const BILLING_OBJECTS = {
       "Up to 10K total products in the store",
     ],
     trialDays: 3,
-    amount: 129,
+    amount: 5.99,
     currencyCode: "USD",
     interval: "month",
     attributes: {
@@ -69,7 +69,7 @@ export const BILLING_OBJECTS = {
       "Up to 100K total products in the store",
     ],
     trialDays: null,
-    amount: 349,
+    amount: 19.99,
     currencyCode: "USD",
     interval: "month",
     attributes: {
