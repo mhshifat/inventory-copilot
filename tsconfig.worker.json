@@ -44,6 +44,9 @@
     "./app/entry.server.tsx",
     "./app/root.tsx",
     "./app/global.css",
-    "./app/globals.d.ts"
+    "./app/globals.d.ts",
+    "./app/lib/logtail.client.ts",
+    "./app/lib/logger.client.ts",
+    "./app/sentry.client.config.ts"
   ]
 }
