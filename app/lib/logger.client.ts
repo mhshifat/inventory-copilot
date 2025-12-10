@@ -10,24 +10,20 @@ interface LogContext {
     email?: string;
     username?: string;
   };
-  route?: string;
-  method?: string;
-  statusCode?: number;
 }
 
-class ServerLogger {
+class ClientLogger {
   private addCommonTags(tags?: Record<string, string>) {
     return {
-      environment: 'server',
-      component: 'backend',
+      environment: 'client',
+      component: 'frontend',
       ...tags,
     };
   }
 
   log(message: string, level: LogLevel = 'info', context?: LogContext) {
     // Always log to console for visibility
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [${level.toUpperCase()}] [BACKEND] ${message}`, context?.extra || '');
+    console.log(`[${level.toUpperCase()}] ${message}`, context?.extra || '');
 
     // Only send warn/error/fatal to Sentry to reduce noise
     // debug and info are console-only for performance
@@ -35,10 +31,7 @@ class ServerLogger {
       Sentry.captureMessage(message, {
         level: level as Sentry.SeverityLevel,
         tags: this.addCommonTags(context?.tags),
-        extra: {
-          timestamp,
-          ...context?.extra,
-        },
+        extra: context?.extra,
         user: context?.user,
       });
     } else {
@@ -66,18 +59,13 @@ class ServerLogger {
   }
 
   error(message: string, error?: Error | unknown, context?: LogContext) {
-    const timestamp = new Date().toISOString();
-    console.error(`[${timestamp}] [ERROR] [BACKEND] ${message}`, error);
+    console.error(`[ERROR] ${message}`, error);
 
     if (error instanceof Error) {
       Sentry.captureException(error, {
         tags: this.addCommonTags(context?.tags),
         extra: {
           message,
-          timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
           ...context?.extra,
         },
         user: context?.user,
@@ -88,10 +76,6 @@ class ServerLogger {
         tags: this.addCommonTags(context?.tags),
         extra: {
           error,
-          timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
           ...context?.extra,
         },
         user: context?.user,
@@ -100,8 +84,7 @@ class ServerLogger {
   }
 
   fatal(message: string, error?: Error | unknown, context?: LogContext) {
-    const timestamp = new Date().toISOString();
-    console.error(`[${timestamp}] [FATAL] [BACKEND] ${message}`, error);
+    console.error(`[FATAL] ${message}`, error);
 
     if (error instanceof Error) {
       Sentry.captureException(error, {
@@ -112,10 +95,6 @@ class ServerLogger {
         }),
         extra: {
           message,
-          timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
           ...context?.extra,
         },
         user: context?.user,
@@ -129,10 +108,6 @@ class ServerLogger {
         }),
         extra: {
           error,
-          timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
           ...context?.extra,
         },
         user: context?.user,
@@ -140,7 +115,7 @@ class ServerLogger {
     }
   }
 
-  // Add breadcrumb for tracking server actions
+  // Add breadcrumb for tracking user actions
   addBreadcrumb(category: string, message: string, data?: Record<string, any>, level: LogLevel = 'info') {
     Sentry.addBreadcrumb({
       category,
@@ -165,51 +140,6 @@ class ServerLogger {
   setTag(key: string, value: string) {
     Sentry.setTag(key, value);
   }
-
-  // Helper for API route logging
-  logApiRequest(route: string, method: string, context?: LogContext) {
-    this.info(`API Request: ${method} ${route}`, {
-      ...context,
-      tags: {
-        ...context?.tags,
-        api_route: route,
-        http_method: method,
-      },
-      route,
-      method,
-    });
-  }
-
-  logApiResponse(route: string, method: string, statusCode: number, duration?: number, context?: LogContext) {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    this.log(`API Response: ${method} ${route} - ${statusCode}`, level, {
-      ...context,
-      tags: {
-        ...context?.tags,
-        api_route: route,
-        http_method: method,
-        status_code: statusCode.toString(),
-      },
-      extra: {
-        ...context?.extra,
-        duration_ms: duration,
-      },
-      route,
-      method,
-      statusCode,
-    });
-  }
 }
 
-export const logger = new ServerLogger();
-
-// Keep backward compatibility with old Logger class
-export class Logger {
-  static log(message: string) {
-    logger.info(message);
-  }
-
-  static error(message: string, error?: Error) {
-    logger.error(message, error);
-  }
-}
+export const logger = new ClientLogger();

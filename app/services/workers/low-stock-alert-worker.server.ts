@@ -1,9 +1,8 @@
 import { Worker } from 'bullmq';
 import { lowStockAlertQueue, QUEUE_NAMES } from './queues.server';
 import { redisClient } from '../../lib/redis.server';
-import { Logger } from '../../lib/logger.server';
+import { logger } from '../../lib/logger.worker';
 import { SendMailService } from '../send-mail';
-import * as Sentry from '@sentry/node';
 
 export interface ILowStockAlertJobData {
     shopId: number;
@@ -17,9 +16,27 @@ export interface ILowStockAlertJobData {
 export async function addLowStockAlertJob(data: ILowStockAlertJobData) {
     try {
         await lowStockAlertQueue.add(QUEUE_NAMES.LOW_STOCK_ALERT, data);
+        logger.info(`Low stock alert job added to queue`, {
+            tags: {
+                queue_name: QUEUE_NAMES.LOW_STOCK_ALERT,
+                alert_type: 'low_stock',
+            },
+            shopId: data.shopId,
+            shop: data.shop,
+            extra: {
+                currentStock: data.currentStock,
+                threshold: data.threshold,
+            },
+        });
     } catch (err) {
-        Logger.error(`Failed to add low stock alert job: ${(err as Error).message}`);
-        Sentry.captureException(err);
+        logger.error(`Failed to add low stock alert job`, err, {
+            tags: {
+                queue_name: QUEUE_NAMES.LOW_STOCK_ALERT,
+                alert_type: 'low_stock',
+            },
+            shopId: data.shopId,
+            shop: data.shop,
+        });
         throw err;
     }
 }
@@ -28,7 +45,10 @@ export function lowStockAlertWorker() {
     const worker = new Worker(
         QUEUE_NAMES.LOW_STOCK_ALERT,
         async job => {
+            const startTime = Date.now();
             const data = job.data as ILowStockAlertJobData;
+
+            logger.logJobStart(job.id!, QUEUE_NAMES.LOW_STOCK_ALERT, QUEUE_NAMES.LOW_STOCK_ALERT, data);
 
             const payload = {
                 subject: 'Low Stock Alert',
@@ -45,6 +65,9 @@ export function lowStockAlertWorker() {
             );
 
             await sendMailService.sendMail(payload, "LOW_STOCK_ALERT");
+
+            const duration = Date.now() - startTime;
+            logger.logJobComplete(job.id!, QUEUE_NAMES.LOW_STOCK_ALERT, QUEUE_NAMES.LOW_STOCK_ALERT, duration);
         },
         {
             connection: redisClient,
@@ -54,20 +77,26 @@ export function lowStockAlertWorker() {
     );
 
     worker.on('completed', job => {
-        Logger.log(`${job.id} has completed!`);
+        logger.info(`Job completed successfully`, {
+            tags: {
+                job_id: job.id!,
+                queue_name: QUEUE_NAMES.LOW_STOCK_ALERT,
+                job_status: 'completed',
+            },
+            jobId: job.id!,
+            jobName: QUEUE_NAMES.LOW_STOCK_ALERT,
+            queueName: QUEUE_NAMES.LOW_STOCK_ALERT,
+        });
     });
 
     worker.on('failed', (job, err) => {
-        Logger.log(`${job?.id} has failed with ${err.message}`);
-        Sentry.captureException(err, {
-            tags: {
-                worker: QUEUE_NAMES.LOW_STOCK_ALERT,
-                jobId: job?.id
-            },
-            extra: {
-                jobData: job?.data
-            }
-        });
+        logger.logJobFailed(
+            job?.id || 'unknown',
+            QUEUE_NAMES.LOW_STOCK_ALERT,
+            QUEUE_NAMES.LOW_STOCK_ALERT,
+            err,
+            job?.data
+        );
     });
 
     return {

@@ -1,10 +1,9 @@
 import { Worker } from 'bullmq';
 import { QUEUE_NAMES, upsertOrderQueue } from './queues.server';
 import { redisClient } from '../../lib/redis.server';
-import { Logger } from '../../lib/logger.server';
+import { logger } from '../../lib/logger.worker';
 import { OrdersImportService } from '../orders-import.server';
 import { SyncLogType } from '@prisma/client';
-import * as Sentry from '@sentry/node';
 
 export interface IUpsertOrderJobData {
     shopId: number;
@@ -19,9 +18,25 @@ export interface IUpsertOrderJobData {
 export async function addUpsertOrderJob(data: IUpsertOrderJobData) {
     try {
         await upsertOrderQueue.add(QUEUE_NAMES.UPSERT_ORDER, data);
+        logger.info(`Order job added to queue: ${data.type}`, {
+            tags: {
+                queue_name: QUEUE_NAMES.UPSERT_ORDER,
+                order_id: data.orderId,
+                job_type: data.type,
+            },
+            shopId: data.shopId,
+            shop: data.shop,
+        });
     } catch (err) {
-        Logger.error(`Failed to ${data.type} order job: ${(err as Error).message}`);
-        Sentry.captureException(err);
+        logger.error(`Failed to add ${data.type} order job`, err, {
+            tags: {
+                queue_name: QUEUE_NAMES.UPSERT_ORDER,
+                order_id: data.orderId,
+                job_type: data.type,
+            },
+            shopId: data.shopId,
+            shop: data.shop,
+        });
         throw err;
     }
 }
@@ -30,7 +45,10 @@ export function upsertOrderWorker() {
     const worker = new Worker(
         QUEUE_NAMES.UPSERT_ORDER,
         async job => {
+            const startTime = Date.now();
             const data = job.data as IUpsertOrderJobData;
+
+            logger.logJobStart(job.id!, QUEUE_NAMES.UPSERT_ORDER, QUEUE_NAMES.UPSERT_ORDER, data);
 
             const orderImportService = new OrdersImportService(
                 data.shopId, data.syncLogId, data.shop, data.accessToken, data.webhookId
@@ -40,6 +58,9 @@ export function upsertOrderWorker() {
             } else {
                 await orderImportService.handleOrderUpsertWebhook(data.orderId, data.type);
             }
+
+            const duration = Date.now() - startTime;
+            logger.logJobComplete(job.id!, QUEUE_NAMES.UPSERT_ORDER, QUEUE_NAMES.UPSERT_ORDER, duration);
         },
         {
             connection: redisClient,
@@ -49,20 +70,26 @@ export function upsertOrderWorker() {
     );
 
     worker.on('completed', job => {
-        Logger.log(`${job.id} has completed!`);
+        logger.info(`Job completed successfully`, {
+            tags: {
+                job_id: job.id!,
+                queue_name: QUEUE_NAMES.UPSERT_ORDER,
+                job_status: 'completed',
+            },
+            jobId: job.id!,
+            jobName: QUEUE_NAMES.UPSERT_ORDER,
+            queueName: QUEUE_NAMES.UPSERT_ORDER,
+        });
     });
 
     worker.on('failed', (job, err) => {
-        Logger.log(`${job?.id} has failed with ${err.message}`);
-        Sentry.captureException(err, {
-            tags: {
-                worker: QUEUE_NAMES.UPSERT_ORDER,
-                jobId: job?.id
-            },
-            extra: {
-                jobData: job?.data
-            }
-        });
+        logger.logJobFailed(
+            job?.id || 'unknown',
+            QUEUE_NAMES.UPSERT_ORDER,
+            QUEUE_NAMES.UPSERT_ORDER,
+            err,
+            job?.data
+        );
     });
 
     return {

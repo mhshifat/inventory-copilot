@@ -1,25 +1,23 @@
-import * as Sentry from "@sentry/remix";
+import * as Sentry from "@sentry/node";
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 interface LogContext {
   tags?: Record<string, string>;
   extra?: Record<string, any>;
-  user?: {
-    id?: string;
-    email?: string;
-    username?: string;
-  };
-  route?: string;
-  method?: string;
-  statusCode?: number;
+  jobId?: string;
+  jobName?: string;
+  queueName?: string;
+  shopId?: number;
+  shop?: string;
 }
 
-class ServerLogger {
+class WorkerLogger {
   private addCommonTags(tags?: Record<string, string>) {
     return {
-      environment: 'server',
-      component: 'backend',
+      environment: 'worker',
+      component: 'worker',
+      process_type: 'bullmq',
       ...tags,
     };
   }
@@ -27,7 +25,7 @@ class ServerLogger {
   log(message: string, level: LogLevel = 'info', context?: LogContext) {
     // Always log to console for visibility
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [${level.toUpperCase()}] [BACKEND] ${message}`, context?.extra || '');
+    console.log(`[${timestamp}] [${level.toUpperCase()}] [WORKER] ${message}`, context?.extra || '');
 
     // Only send warn/error/fatal to Sentry to reduce noise
     // debug and info are console-only for performance
@@ -39,7 +37,6 @@ class ServerLogger {
           timestamp,
           ...context?.extra,
         },
-        user: context?.user,
       });
     } else {
       // For debug/info, just add as breadcrumb for context
@@ -67,7 +64,7 @@ class ServerLogger {
 
   error(message: string, error?: Error | unknown, context?: LogContext) {
     const timestamp = new Date().toISOString();
-    console.error(`[${timestamp}] [ERROR] [BACKEND] ${message}`, error);
+    console.error(`[${timestamp}] [ERROR] [WORKER] ${message}`, error);
 
     if (error instanceof Error) {
       Sentry.captureException(error, {
@@ -75,12 +72,13 @@ class ServerLogger {
         extra: {
           message,
           timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
+          jobId: context?.jobId,
+          jobName: context?.jobName,
+          queueName: context?.queueName,
+          shopId: context?.shopId,
+          shop: context?.shop,
           ...context?.extra,
         },
-        user: context?.user,
       });
     } else {
       Sentry.captureMessage(`${message}: ${JSON.stringify(error)}`, {
@@ -89,19 +87,20 @@ class ServerLogger {
         extra: {
           error,
           timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
+          jobId: context?.jobId,
+          jobName: context?.jobName,
+          queueName: context?.queueName,
+          shopId: context?.shopId,
+          shop: context?.shop,
           ...context?.extra,
         },
-        user: context?.user,
       });
     }
   }
 
   fatal(message: string, error?: Error | unknown, context?: LogContext) {
     const timestamp = new Date().toISOString();
-    console.error(`[${timestamp}] [FATAL] [BACKEND] ${message}`, error);
+    console.error(`[${timestamp}] [FATAL] [WORKER] ${message}`, error);
 
     if (error instanceof Error) {
       Sentry.captureException(error, {
@@ -113,12 +112,13 @@ class ServerLogger {
         extra: {
           message,
           timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
+          jobId: context?.jobId,
+          jobName: context?.jobName,
+          queueName: context?.queueName,
+          shopId: context?.shopId,
+          shop: context?.shop,
           ...context?.extra,
         },
-        user: context?.user,
       });
     } else {
       Sentry.captureMessage(`${message}: ${JSON.stringify(error)}`, {
@@ -130,17 +130,70 @@ class ServerLogger {
         extra: {
           error,
           timestamp,
-          route: context?.route,
-          method: context?.method,
-          statusCode: context?.statusCode,
+          jobId: context?.jobId,
+          jobName: context?.jobName,
+          queueName: context?.queueName,
+          shopId: context?.shopId,
+          shop: context?.shop,
           ...context?.extra,
         },
-        user: context?.user,
       });
     }
   }
 
-  // Add breadcrumb for tracking server actions
+  // Helper for job lifecycle logging
+  logJobStart(jobId: string, jobName: string, queueName: string, data?: any) {
+    this.info(`Job started: ${jobName}`, {
+      tags: {
+        job_id: jobId,
+        job_name: jobName,
+        queue_name: queueName,
+        job_status: 'started',
+      },
+      extra: {
+        jobData: data,
+      },
+      jobId,
+      jobName,
+      queueName,
+    });
+  }
+
+  logJobComplete(jobId: string, jobName: string, queueName: string, duration?: number) {
+    this.info(`Job completed: ${jobName}`, {
+      tags: {
+        job_id: jobId,
+        job_name: jobName,
+        queue_name: queueName,
+        job_status: 'completed',
+      },
+      extra: {
+        duration_ms: duration,
+      },
+      jobId,
+      jobName,
+      queueName,
+    });
+  }
+
+  logJobFailed(jobId: string, jobName: string, queueName: string, error: Error | unknown, data?: any) {
+    this.error(`Job failed: ${jobName}`, error, {
+      tags: {
+        job_id: jobId,
+        job_name: jobName,
+        queue_name: queueName,
+        job_status: 'failed',
+      },
+      extra: {
+        jobData: data,
+      },
+      jobId,
+      jobName,
+      queueName,
+    });
+  }
+
+  // Add breadcrumb for tracking worker actions
   addBreadcrumb(category: string, message: string, data?: Record<string, any>, level: LogLevel = 'info') {
     Sentry.addBreadcrumb({
       category,
@@ -149,11 +202,6 @@ class ServerLogger {
       data,
       timestamp: Date.now() / 1000,
     });
-  }
-
-  // Set user context
-  setUser(user: { id?: string; email?: string; username?: string } | null) {
-    Sentry.setUser(user);
   }
 
   // Set custom context
@@ -165,51 +213,6 @@ class ServerLogger {
   setTag(key: string, value: string) {
     Sentry.setTag(key, value);
   }
-
-  // Helper for API route logging
-  logApiRequest(route: string, method: string, context?: LogContext) {
-    this.info(`API Request: ${method} ${route}`, {
-      ...context,
-      tags: {
-        ...context?.tags,
-        api_route: route,
-        http_method: method,
-      },
-      route,
-      method,
-    });
-  }
-
-  logApiResponse(route: string, method: string, statusCode: number, duration?: number, context?: LogContext) {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    this.log(`API Response: ${method} ${route} - ${statusCode}`, level, {
-      ...context,
-      tags: {
-        ...context?.tags,
-        api_route: route,
-        http_method: method,
-        status_code: statusCode.toString(),
-      },
-      extra: {
-        ...context?.extra,
-        duration_ms: duration,
-      },
-      route,
-      method,
-      statusCode,
-    });
-  }
 }
 
-export const logger = new ServerLogger();
-
-// Keep backward compatibility with old Logger class
-export class Logger {
-  static log(message: string) {
-    logger.info(message);
-  }
-
-  static error(message: string, error?: Error) {
-    logger.error(message, error);
-  }
-}
+export const logger = new WorkerLogger();
