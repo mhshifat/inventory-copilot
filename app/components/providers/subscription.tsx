@@ -45,7 +45,6 @@ export default function AppSubscription({ children, currentSubscription: current
   }, [location, navigate]);
 
   useEffect(() => {
-    console.log({ shouldShowUpgradePrompt });
     !["/app", "/app/settings", "/app/billing"].includes(location.pathname) && shouldShowUpgradePrompt && navigate("/app/billing");
   }, [shouldShowUpgradePrompt, location, navigate])
 

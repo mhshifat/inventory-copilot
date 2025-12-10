@@ -75,6 +75,7 @@ export default function App() {
         </AppSubscription>
         <ScrollRestoration />
         <Scripts />
+        <script src="//code.tidio.co/qya0ec1pkef3eabnujgmbqsjcyiwpwht.js" async></script>
       </body>
     </html>
   );
