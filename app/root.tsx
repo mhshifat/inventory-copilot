@@ -51,6 +51,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         NODE_ENV: process.env.NODE_ENV,
         SENTRY_DSN: process.env.SENTRY_DSN,
         SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
+        BETTERSTACK_SOURCE_TOKEN: process.env.BETTERSTACK_SOURCE_TOKEN,
+        BETTERSTACK_SOURCE_HOST: process.env.BETTERSTACK_SOURCE_HOST,
       }
     };
   } catch (error) {
@@ -64,6 +66,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         NODE_ENV: process.env.NODE_ENV,
         SENTRY_DSN: process.env.SENTRY_DSN,
         SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
+        BETTERSTACK_SOURCE_TOKEN: process.env.BETTERSTACK_SOURCE_TOKEN,
+        BETTERSTACK_SOURCE_HOST: process.env.BETTERSTACK_SOURCE_HOST,
       }
     };
   }

@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/remix";
+import { getLogtail, isLogtailEnabled } from "./logtail.server";
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
@@ -28,6 +29,20 @@ class ServerLogger {
     // Always log to console for visibility
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}] [${level.toUpperCase()}] [BACKEND] ${message}`, context?.extra || '');
+
+    // Send to BetterStack for live logging
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.log(message, level, {
+        ...this.addCommonTags(context?.tags),
+        ...context?.extra,
+        timestamp,
+        route: context?.route,
+        method: context?.method,
+        statusCode: context?.statusCode,
+        user: context?.user,
+      });
+    }
 
     // Only send warn/error/fatal to Sentry to reduce noise
     // debug and info are console-only for performance
@@ -69,6 +84,25 @@ class ServerLogger {
     const timestamp = new Date().toISOString();
     console.error(`[${timestamp}] [ERROR] [BACKEND] ${message}`, error);
 
+    // Send to BetterStack
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.error(message, {
+        ...this.addCommonTags(context?.tags),
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        } : error,
+        timestamp,
+        route: context?.route,
+        method: context?.method,
+        statusCode: context?.statusCode,
+        ...context?.extra,
+        user: context?.user,
+      });
+    }
+
     if (error instanceof Error) {
       Sentry.captureException(error, {
         tags: this.addCommonTags(context?.tags),
@@ -102,6 +136,27 @@ class ServerLogger {
   fatal(message: string, error?: Error | unknown, context?: LogContext) {
     const timestamp = new Date().toISOString();
     console.error(`[${timestamp}] [FATAL] [BACKEND] ${message}`, error);
+
+    // Send to BetterStack
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.error(message, {
+        ...this.addCommonTags(context?.tags),
+        severity: 'critical',
+        level: 'fatal',
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        } : error,
+        timestamp,
+        route: context?.route,
+        method: context?.method,
+        statusCode: context?.statusCode,
+        ...context?.extra,
+        user: context?.user,
+      });
+    }
 
     if (error instanceof Error) {
       Sentry.captureException(error, {

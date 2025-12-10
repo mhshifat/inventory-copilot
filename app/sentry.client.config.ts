@@ -6,7 +6,7 @@ Sentry.init({
   dsn: window.ENV?.SENTRY_DSN,
   
   // Set the environment
-  environment: window.ENV?.NODE_ENV || 'development',
+  environment: window.ENV?.SENTRY_ENVIRONMENT || window.ENV?.NODE_ENV || 'development',
   
   // Performance monitoring
   tracesSampleRate: window.ENV?.NODE_ENV === 'production' ? 0.1 : 1.0,

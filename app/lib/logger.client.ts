@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/remix";
+import { getLogtail, isLogtailEnabled } from "./logtail.client";
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
@@ -24,6 +25,16 @@ class ClientLogger {
   log(message: string, level: LogLevel = 'info', context?: LogContext) {
     // Always log to console for visibility
     console.log(`[${level.toUpperCase()}] ${message}`, context?.extra || '');
+
+    // Send to BetterStack for live logging
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.log(message, level, {
+        ...this.addCommonTags(context?.tags),
+        ...context?.extra,
+        user: context?.user,
+      });
+    }
 
     // Only send warn/error/fatal to Sentry to reduce noise
     // debug and info are console-only for performance
@@ -61,6 +72,21 @@ class ClientLogger {
   error(message: string, error?: Error | unknown, context?: LogContext) {
     console.error(`[ERROR] ${message}`, error);
 
+    // Send to BetterStack
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.error(message, {
+        ...this.addCommonTags(context?.tags),
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        } : error,
+        ...context?.extra,
+        user: context?.user,
+      });
+    }
+
     if (error instanceof Error) {
       Sentry.captureException(error, {
         tags: this.addCommonTags(context?.tags),
@@ -85,6 +111,23 @@ class ClientLogger {
 
   fatal(message: string, error?: Error | unknown, context?: LogContext) {
     console.error(`[FATAL] ${message}`, error);
+
+    // Send to BetterStack
+    if (isLogtailEnabled()) {
+      const logtail = getLogtail();
+      logtail?.error(message, {
+        ...this.addCommonTags(context?.tags),
+        severity: 'critical',
+        level: 'fatal',
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        } : error,
+        ...context?.extra,
+        user: context?.user,
+      });
+    }
 
     if (error instanceof Error) {
       Sentry.captureException(error, {

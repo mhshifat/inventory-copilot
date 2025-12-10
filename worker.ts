@@ -7,6 +7,7 @@ import { upsertProductWorker } from './app/services/workers/upsert-product-worke
 import { createProductsImportWorker } from './app/services/workers/import-products-worker.server';
 import { upsertOrderWorker } from './app/services/workers/upsert-order-worker.server';
 import { lowStockAlertWorker } from './app/services/workers/low-stock-alert-worker.server';
+import { logger } from '@/lib/logger.worker';
 
 (async () => {
   try {
@@ -18,6 +19,7 @@ import { lowStockAlertWorker } from './app/services/workers/low-stock-alert-work
     ];
   
     console.log({ "Running Workers": workers.map((worker) => worker?.name) });
+    logger.log('Worker process started');
   
     // Graceful shutdown
     async function shutdown(signal: string) {
