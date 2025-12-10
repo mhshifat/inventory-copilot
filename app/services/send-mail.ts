@@ -2,6 +2,7 @@ import prisma from "../lib/db.server";
 import { BaseService } from "./base-srv.server";
 import type { SyncLogType } from "@prisma/client";
 import { SyncLogStatus } from "@prisma/client";
+import * as Sentry from "@sentry/node";
 
 import sgMail from '@sendgrid/mail';
 
@@ -74,6 +75,24 @@ export class SendMailService extends BaseService {
         } catch (error) {
             console.dir(error, { depth: null });
             const errMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            
+            // Capture error in Sentry with context
+            Sentry.captureException(error, {
+                tags: {
+                    service: 'send-mail',
+                    shop_id: this.shopId.toString(),
+                    sync_log_type: type,
+                },
+                extra: {
+                    payload: {
+                        to: payload.to,
+                        subject: payload.subject,
+                        from: payload.from,
+                    },
+                    shop: this.shop,
+                },
+            });
+            
             await prisma.syncLog.upsert({
                 where: { id: this.syncLogId },
                 update: {

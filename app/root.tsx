@@ -12,6 +12,8 @@ import {
 import AppSubscription from "./components/providers/subscription";
 import { authenticate, BILLING_OBJECTS } from "./shopify.server";
 import ProgressBar from "./components/shared/progress-bar";
+import * as Sentry from "@sentry/remix";
+import { useEffect } from "react";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -45,15 +47,30 @@ export async function loader({ request }: LoaderFunctionArgs) {
       currentBilling: currentBilling || null,
       billingPlans,
       shouldShowUpgradePrompt: billingPlanProductLimit > 0 && totalShopifyProducts > billingPlanProductLimit,
+      ENV: {
+        NODE_ENV: process.env.NODE_ENV,
+        SENTRY_DSN: process.env.SENTRY_DSN,
+        SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
+      }
     };
   } catch (error) {
     console.log(error);
-    return { currentBilling: null, billingPlans: [], shouldShowUpgradePrompt: false};
+    Sentry.captureException(error);
+    return { 
+      currentBilling: null, 
+      billingPlans: [], 
+      shouldShowUpgradePrompt: false,
+      ENV: {
+        NODE_ENV: process.env.NODE_ENV,
+        SENTRY_DSN: process.env.SENTRY_DSN,
+        SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
+      }
+    };
   }
 }
 
 export default function App() {
-  const { currentBilling, billingPlans, shouldShowUpgradePrompt } = useLoaderData<typeof loader>();
+  const { currentBilling, billingPlans, shouldShowUpgradePrompt, ENV } = useLoaderData<typeof loader>();
 
   return (
     <html>
@@ -67,6 +84,11 @@ export default function App() {
         />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(ENV)}`,
+          }}
+        />
       </head>
       <body>
         <ProgressBar />
@@ -83,6 +105,16 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  
+  useEffect(() => {
+    // Capture the error in Sentry
+    if (error instanceof Error) {
+      Sentry.captureException(error);
+    } else {
+      Sentry.captureException(new Error(JSON.stringify(error)));
+    }
+  }, [error]);
+
   console.error(error);
 
   return (

@@ -3,6 +3,7 @@ import { QUEUE_NAMES, upsertProductQueue } from './queues.server';
 import { redisClient } from '../../lib/redis.server';
 import { Logger } from '../../lib/logger.server';
 import { ProductsImportService } from '../products-import.server';
+import * as Sentry from '@sentry/node';
 
 export interface IUpsertProductJobData {
     shopId: number;
@@ -19,6 +20,7 @@ export async function addUpsertProductJob(data: IUpsertProductJobData) {
         await upsertProductQueue.add(QUEUE_NAMES.UPSERT_PRODUCT, data);
     } catch (err) {
         Logger.error(`Failed to ${data.type} product job: ${(err as Error).message}`);
+        Sentry.captureException(err);
         throw err;
     }
 }
@@ -51,6 +53,15 @@ export function upsertProductWorker() {
 
     worker.on('failed', (job, err) => {
         Logger.log(`${job?.id} has failed with ${err.message}`);
+        Sentry.captureException(err, {
+            tags: {
+                worker: QUEUE_NAMES.UPSERT_PRODUCT,
+                jobId: job?.id
+            },
+            extra: {
+                jobData: job?.data
+            }
+        });
     });
 
     return {

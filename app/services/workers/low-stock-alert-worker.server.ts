@@ -3,6 +3,7 @@ import { lowStockAlertQueue, QUEUE_NAMES } from './queues.server';
 import { redisClient } from '../../lib/redis.server';
 import { Logger } from '../../lib/logger.server';
 import { SendMailService } from '../send-mail';
+import * as Sentry from '@sentry/node';
 
 export interface ILowStockAlertJobData {
     shopId: number;
@@ -18,6 +19,7 @@ export async function addLowStockAlertJob(data: ILowStockAlertJobData) {
         await lowStockAlertQueue.add(QUEUE_NAMES.LOW_STOCK_ALERT, data);
     } catch (err) {
         Logger.error(`Failed to add low stock alert job: ${(err as Error).message}`);
+        Sentry.captureException(err);
         throw err;
     }
 }
@@ -57,6 +59,15 @@ export function lowStockAlertWorker() {
 
     worker.on('failed', (job, err) => {
         Logger.log(`${job?.id} has failed with ${err.message}`);
+        Sentry.captureException(err, {
+            tags: {
+                worker: QUEUE_NAMES.LOW_STOCK_ALERT,
+                jobId: job?.id
+            },
+            extra: {
+                jobData: job?.data
+            }
+        });
     });
 
     return {

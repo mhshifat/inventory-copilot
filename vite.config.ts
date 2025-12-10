@@ -3,6 +3,7 @@ import { installGlobals } from "@remix-run/node";
 import { defineConfig, type UserConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 installGlobals({ nativeFetch: true });
 
@@ -65,7 +66,17 @@ export default defineConfig({
     }),
     tsconfigPaths(),
     tailwindcss(),
-  ],
+    // Put the Sentry vite plugin after all other plugins
+    process.env.NODE_ENV === 'production' && sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      sourcemaps: {
+        assets: './build/**',
+      },
+      telemetry: false,
+    }),
+  ].filter(Boolean),
   build: {
     assetsInlineLimit: 0,
   },

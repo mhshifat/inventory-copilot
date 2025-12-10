@@ -4,6 +4,7 @@ import { redisClient } from '../../lib/redis.server';
 import { Logger } from '../../lib/logger.server';
 import { OrdersImportService } from '../orders-import.server';
 import { SyncLogType } from '@prisma/client';
+import * as Sentry from '@sentry/node';
 
 export interface IUpsertOrderJobData {
     shopId: number;
@@ -20,6 +21,7 @@ export async function addUpsertOrderJob(data: IUpsertOrderJobData) {
         await upsertOrderQueue.add(QUEUE_NAMES.UPSERT_ORDER, data);
     } catch (err) {
         Logger.error(`Failed to ${data.type} order job: ${(err as Error).message}`);
+        Sentry.captureException(err);
         throw err;
     }
 }
@@ -52,6 +54,15 @@ export function upsertOrderWorker() {
 
     worker.on('failed', (job, err) => {
         Logger.log(`${job?.id} has failed with ${err.message}`);
+        Sentry.captureException(err, {
+            tags: {
+                worker: QUEUE_NAMES.UPSERT_ORDER,
+                jobId: job?.id
+            },
+            extra: {
+                jobData: job?.data
+            }
+        });
     });
 
     return {
